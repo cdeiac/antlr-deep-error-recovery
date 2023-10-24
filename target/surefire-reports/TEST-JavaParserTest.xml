@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="JavaParserTest" time="0.198" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
+    <property name="java.specification.version" value="11"/>
+    <property name="sun.cpu.isalist" value=""/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/workspaces/antlr-deep-error-recovery/target/test-classes:/workspaces/antlr-deep-error-recovery/target/classes:/home/codespace/.m2/repository/org/antlr/antlr4-runtime/4.13.1/antlr4-runtime-4.13.1.jar:/home/codespace/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/codespace/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/home/codespace/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/codespace/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/codespace/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/codespace/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:"/>
+    <property name="java.vm.vendor" value="Microsoft"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://www.microsoft.com"/>
+    <property name="user.timezone" value=""/>
+    <property name="java.vm.specification.version" value="11"/>
+    <property name="os.name" value="Linux"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.boot.library.path" value="/opt/java/11.0.14/lib"/>
+    <property name="sun.java.command" value="/workspaces/antlr-deep-error-recovery/target/surefire/surefirebooter-20231001154918288_3.jar /workspaces/antlr-deep-error-recovery/target/surefire 2023-10-01T15-49-18_041-jvmRun1 surefire-20231001154918288_1tmp surefire_0-20231001154918288_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/workspaces/antlr-deep-error-recovery/target/test-classes:/workspaces/antlr-deep-error-recovery/target/classes:/home/codespace/.m2/repository/org/antlr/antlr4-runtime/4.13.1/antlr4-runtime-4.13.1.jar:/home/codespace/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/codespace/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/home/codespace/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/codespace/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/codespace/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/codespace/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/codespace"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2022-02-08"/>
+    <property name="java.home" value="/opt/java/11.0.14"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/workspaces/antlr-deep-error-recovery"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
+    <property name="surefire.real.class.path" value="/workspaces/antlr-deep-error-recovery/target/surefire/surefirebooter-20231001154918288_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="11.0.14.1+1-LTS"/>
+    <property name="user.name" value="codespace"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="6.2.0-1012-azure"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="skipTest" value="true"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Microsoft-31205"/>
+    <property name="localRepository" value="/home/codespace/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/microsoft/openjdk/issues"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="11.0.14.1"/>
+    <property name="user.dir" value="/workspaces/antlr-deep-error-recovery"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.vendor" value="Microsoft"/>
+    <property name="java.vm.version" value="11.0.14.1+1-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="55.0"/>
+  </properties>
+  <testcase name="method_name_starts_with_number_causes_error" classname="JavaParserTest" time="0.162">
+    <system-out><![CDATA[enter   compilationUnit, LT(1)=public
+enter   typeDeclaration, LT(1)=public
+enter   classOrInterfaceModifier, LT(1)=public
+consume [@0,0:5='public',<35>,1:0] rule classOrInterfaceModifier
+exit    classOrInterfaceModifier, LT(1)=class
+enter   classDeclaration, LT(1)=class
+consume [@2,7:11='class',<9>,1:7] rule classDeclaration
+enter   identifier, LT(1)=SampleClass
+consume [@4,13:23='SampleClass',<128>,1:13] rule identifier
+exit    identifier, LT(1)={
+enter   classBody, LT(1)={
+consume [@6,25:25='{',<80>,1:25] rule classBody
+enter   classBodyDeclaration, LT(1)=void
+enter   memberDeclaration, LT(1)=void
+enter   methodDeclaration, LT(1)=void
+enter   typeTypeOrVoid, LT(1)=void
+consume [@8,27:30='void',<48>,1:27] rule typeTypeOrVoid
+exit    typeTypeOrVoid, LT(1)=1d
+enter   identifier, LT(1)=1d
+consume [@11,34:43='oSomething',<128>,1:34] rule identifier
+exit    identifier, LT(1)=(
+enter   formalParameters, LT(1)=(
+consume [@12,44:44='(',<78>,1:44] rule formalParameters
+consume [@13,45:45=')',<79>,1:45] rule formalParameters
+exit    formalParameters, LT(1)={
+enter   methodBody, LT(1)={
+enter   block, LT(1)={
+consume [@14,46:46='{',<80>,1:46] rule block
+consume [@15,47:47='}',<81>,1:47] rule block
+exit    block, LT(1)=}
+exit    methodBody, LT(1)=}
+exit    methodDeclaration, LT(1)=}
+exit    memberDeclaration, LT(1)=}
+exit    classBodyDeclaration, LT(1)=}
+consume [@17,49:49='}',<81>,1:49] rule classBody
+exit    classBody, LT(1)=<EOF>
+exit    classDeclaration, LT(1)=<EOF>
+exit    typeDeclaration, LT(1)=<EOF>
+exit    compilationUnit, LT(1)=<EOF>
+]]></system-out>
+    <system-err><![CDATA[line 1:32 extraneous input '1d' expecting {'module', 'open', 'requires', 'exports', 'opens', 'to', 'uses', 'provides', 'with', 'transitive', 'var', 'yield', 'record', 'sealed', 'permits', IDENTIFIER}
+]]></system-err>
+  </testcase>
+</testsuite>
