@@ -26,3 +26,6 @@ replay_pid*
 # IntelliJ IDEA
 .idea
 target
+
+# Large Data files
+src/main/resources/data

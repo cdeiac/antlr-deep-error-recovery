@@ -1,4 +1,4 @@
-package extensions;
+package antlr.extensions;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.BitSet;
 
-import static extensions.TokenGenerator.getRandomString;
+import static antlr.extensions.TokenGenerator.getRandomString;
 
 public class CustomErrorListener extends BaseErrorListener {
 

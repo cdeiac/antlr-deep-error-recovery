@@ -1,7 +1,7 @@
-package extensions;
+package antlr.extensions;
 
-import com.antlr.grammars.java.JavaParser;
-import com.antlr.grammars.java.JavaParserBaseListener;
+import antlr.JavaParser;
+import antlr.JavaParserBaseListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 

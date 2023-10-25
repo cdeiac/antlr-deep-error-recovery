@@ -1,5 +1,5 @@
 // Generated from /Users/study/IdeaProjects/antlr-sample/src/main/resources/grammars/java/JavaLexer.g4 by ANTLR 4.13.1
-package com.antlr.grammars.java;
+package antlr;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

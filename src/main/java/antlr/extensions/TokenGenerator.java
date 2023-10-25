@@ -1,4 +1,4 @@
-package extensions;
+package antlr.extensions;
 
 import java.util.Random;
 
