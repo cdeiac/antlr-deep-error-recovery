@@ -9,22 +9,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-#if __name__ == '__main__':
-    #json_data = json.load(open(os.path.dirname(os.path.realpath(__file__)).replace('python', 'resources/generated/noisy_jhetas_clean_10.json')))
-    #json_arr = []
-    #for i, item in enumerate(json_data):
-    #    if i < 5000:
-    #        json_arr.append(item)
-
-    #print(len(json_arr))
-    #with open("../resources/generated/data.json", "w+") as f:
-    #    json.dump(json_arr, f)
-
-
 
 if __name__ == '__main__':
     # config
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    #runner = Runner()
+    #java_dataset = runner.load_dataset()
+    #runner.split_dataset(java_dataset)
+    #runner.generate_cv_folds(java_dataset)
+
     # load data
     train_input, train_target, test_input, test_target = create_complex_data()
     # create vocabulary
