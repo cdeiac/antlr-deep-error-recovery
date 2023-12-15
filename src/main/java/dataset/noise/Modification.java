@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class Modification implements NoiseStrategy {
 
-    private final static Logger logger = LoggerFactory.getLogger(Insertion.class);
+    private final static Logger logger = LoggerFactory.getLogger(Modification.class);
     private final Tokenizer tokenizer;
 
 

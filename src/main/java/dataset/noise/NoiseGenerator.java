@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class NoiseGenerator {
 
-    private final static Logger logger = LoggerFactory.getLogger(Insertion.class);
+    private final static Logger logger = LoggerFactory.getLogger(NoiseGenerator.class);
     private final List<NoiseStrategy> noiseStrategies;
     private final Random randomStrategy;
     private final Random randomNoise;
@@ -27,7 +27,7 @@ public class NoiseGenerator {
      *  Generate noise for given token according to the configured probability
      *  @param token given token
      *  @param probability given probability (e.g., 0.1, 1.5, 3.0)
-     *  @return generated tokens
+     *  @return generated tokens, or the same token if the probability did not apply
      */
     public String[] processWithProbability(String token, double probability) {
         logger.debug("Process Token with probability {}", probability);

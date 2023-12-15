@@ -28,4 +28,4 @@ replay_pid*
 target
 
 # Large Data files
-src/main/resources/data
+src/main/resources

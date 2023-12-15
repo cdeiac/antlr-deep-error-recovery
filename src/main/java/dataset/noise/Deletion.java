@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class Deletion implements NoiseStrategy {
 
-    private final static Logger logger = LoggerFactory.getLogger(Insertion.class);
+    private final static Logger logger = LoggerFactory.getLogger(Deletion.class);
 
 
     @Override
