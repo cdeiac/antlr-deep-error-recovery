@@ -29,3 +29,7 @@ target
 
 # Large Data files
 src/main/resources
+src/main/python/cache
+src/main/python/data
+src/main/python/logs
+src/main/python/saved_models
