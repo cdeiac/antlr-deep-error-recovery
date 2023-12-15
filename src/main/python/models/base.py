@@ -4,7 +4,7 @@ import torch.nn as nn
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_size, embedding_dim, hidden_dim, num_layers, latent_dim, bidirectional=False):
+    def __init__(self, input_size, embedding_dim, hidden_dim, num_layers, latent_dim, bidirectional=False, batch_size=1):
         super(Encoder, self).__init__()
         self.input_size = input_size
         self.embedding_dim = embedding_dim
@@ -12,6 +12,8 @@ class Encoder(nn.Module):
         self.num_layers = num_layers
         self.bidirectional = bidirectional
         self.latent_dim = latent_dim
+        self.batch_size = batch_size
+        self.directions = 2 if bidirectional else 1
 
         self.embedding = nn.Embedding(self.input_size, self.embedding_dim, dtype=torch.float32)
         self.LSTM = nn.LSTM(self.embedding_dim, self.hidden_dim, self.num_layers, bidirectional=self.bidirectional)
