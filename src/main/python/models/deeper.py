@@ -22,14 +22,18 @@ class Encoder(nn.Module):
     def forward(self, x):
         embedding = self.embedding(x)
         _, (h_s, _) = self.LSTM(embedding)
-        h_s_last = h_s[-1]
+        h_s_last = h_s.view(self.num_layers, self.directions, self.batch_size, self.hidden_size)[-1]
 
-        fc1_output = self.fc1(h_s_last)
-        fc1_output = nn.functional.relu(fc1_output)
-        fc2_output = self.fc2(fc1_output)
-        fc2_output = nn.functional.relu(fc2_output)
+        if self.bidirectional:
+            direction_1, direction_2 = h_s_last[0], h_s_last[1]
+            direction_full = torch.cat((direction_1, direction_2))
+        else:
+            direction_full = h_s_last.squeeze(0)
 
-        return torch.cat([fc2_output.unsqueeze(0)] * self.num_of_lstms)
+        fc_output = self.fc(direction_full)
+        fc_output = nn.functional.relu(fc_output)
+        return torch.cat([fc_output] * self.num_layers)
+
 
 
 class Decoder(nn.Module):
