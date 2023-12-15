@@ -1,3 +1,7 @@
+import torch
+import random
+import torch.nn as nn
+
 class Encoder(nn.Module):
     def __init__(self, input_size, embedding_size, hidden_size, num_layers, bottleneck_size, bidirectional=False, batch_size=1):
         super(Encoder, self).__init__()
