@@ -128,4 +128,4 @@ class DenoisingAE(nn.Module):
 
     def forward(self, x, y, tfr=0.0):
         context_vector = self.encoder(x)
-        return self.decoder(x, y, context_vector, tfr)
+        return self.decoder(y, context_vector, tfr)
