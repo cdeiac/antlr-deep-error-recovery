@@ -112,3 +112,31 @@ class Dataset(Dataset):
             self.original_data[i] = torch.tensor(data)
         for i, data in enumerate(self.noisy_data):
             self.noisy_data[i] = torch.tensor(data)
+
+    @staticmethod
+    def generate_windows(source, target, window_size=512, stride=256, padding_value=3):
+        # find the max length
+        max_length = max(source.size(0), target.size(0), window_size)
+        # padding
+        input_padding = max(0, max_length - source.size(0))
+        target_padding = max(0, max_length - target.size(0))
+        input_padded = torch.nn.functional.pad(source, (0, input_padding), value=padding_value)
+        target_padded = torch.nn.functional.pad(target, (0, target_padding), value=padding_value)
+        # create sliding windows
+        input_windows = []
+        target_windows = []
+        for i in range(0, max_length - window_size + 1, stride):
+            input_windows.append(input_padded[i:i + window_size])
+            target_windows.append(target_padded[i:i + window_size])
+        # to tensors
+        return torch.stack(input_windows), torch.stack(target_windows)
+
+    def generate_windows_for_dataset(self, source, target, device, window_size=512, step_size=256, pad_value=3):
+        source_windowed = []
+        target_windowed = []
+        for i in range(len(source)):
+            src_w, trg_w = self.generate_windows(source[i], target[i], window_size, step_size, pad_value)
+            source_windowed.append(src_w.to(device))
+            target_windowed.append(trg_w.to(device))
+        return source_windowed, target_windowed
+
