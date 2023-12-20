@@ -54,13 +54,13 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, latent_size, hidden_size, num_layers, vocab_size, device, bidirectional=False):
+    def __init__(self, input_size, hidden_size, num_layers, vocab_size, device, bidirectional=False):
         """
         Initializes the Decoder module.
 
         Args:
-            latent_size (int): The input of the decoder which is the size of the latent space of the encoder.
-            hidden_size (int): The size of the hidden state in the LSTM.
+            input_size (int): The input of the decoder which is equal to batch_size since we feed in one token at a time
+            hidden_size (int): The size of the hidden state in the LSTM, must match the size of the latent space of the encoder.
             num_layers (int): The number of layers in the LSTM.
             vocab_size (int): The size of the vocabulary which is the output size of the decoder.
             device (str): The device (e.g., 'cuda' or 'cpu') on which the model will be run.
@@ -68,14 +68,14 @@ class Decoder(nn.Module):
         """
         super(Decoder, self).__init__()
         self.device = device
-        self.latent_size = latent_size
+        self.input_size = input_size
         self.num_layers = num_layers
         self.vocab_size = vocab_size
         self.bidirectional = bidirectional
         self.hidden_size = hidden_size
         self.fc_size = self.hidden_size * 2 if self.bidirectional else self.hidden_size
 
-        self.LSTM = nn.LSTM(self.latent_size, self.hidden_size, self.num_layers, bidirectional=self.bidirectional)
+        self.LSTM = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, bidirectional=self.bidirectional)
         self.fc = nn.Linear(self.fc_size, self.vocab_size)
 
     def forward(self, y, context_vector, tfr=0.0):
