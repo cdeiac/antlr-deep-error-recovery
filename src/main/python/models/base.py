@@ -47,11 +47,7 @@ class Encoder(nn.Module):
             h_s_last = torch.cat((h_s_last[0], h_s_last[1]))
         else:
             h_s_last = h_s_last.squeeze(0)
-        fc2_out = self.fc2(h_s_last)
-        #fc2_out = nn.functional.relu(fc2_out)
-        #enc_hidden = torch.cat([fc2_out] * self.num_layers)
-        #return enc_hidden
-        return fc2_out # [1, latent_size]
+        return self.fc2(h_s_last) # [1, latent_size]
 
 
 class Decoder(nn.Module):
