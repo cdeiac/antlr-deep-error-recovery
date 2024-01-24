@@ -15,15 +15,19 @@ public class Entry {
     @JsonProperty("sourceWithNoise")
     private String sourceWithNoise;
 
+    @JsonProperty("noiseOperations")
+    private int[] noiseOperations;
+
 
     public Entry() {
 
     }
 
-    public Entry(File file, String sourceOriginal, String sourceWithNoise) {
+    public Entry(File file, String sourceOriginal, String sourceWithNoise, int[] noiseOperations) {
         this.file = file;
         this.sourceOriginal = sourceOriginal;
         this.sourceWithNoise = sourceWithNoise;
+        this.noiseOperations = noiseOperations;
     }
 
 
@@ -39,6 +43,10 @@ public class Entry {
         this.sourceWithNoise = sourceWithNoise;
     }
 
+    public void setNoiseOperations(int[] noiseOperations) {
+        this.noiseOperations = noiseOperations;
+    }
+
 
     public String getSourceWithNoise() {
         return sourceWithNoise;
@@ -50,5 +58,9 @@ public class Entry {
 
     public String getSourceOriginal() {
         return sourceOriginal;
+    }
+
+    public int[] getNoiseOperations() {
+        return noiseOperations;
     }
 }

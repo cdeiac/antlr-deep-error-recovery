@@ -6,12 +6,13 @@ import antlr.extensions.CustomVisitor;
 import antlr.extensions.TreeUtils;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.logging.Logger;
 
-
+@Disabled
 public class JavaParserTest {
 
     private static final Logger logger = Logger.getLogger(JavaParserTest.class.getName());

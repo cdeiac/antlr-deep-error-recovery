@@ -1,5 +1,6 @@
 package dataset;
 
+import cli.Config;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,17 +33,17 @@ public class Dataset {
     private BufferedInputStream inputStream;
 
 
-    public Dataset(String fileName) {
-        this.fileName = fileName;
+    public Dataset(Config config) {
+        this.fileName = config.getDataPath();
         this.mapper = new ObjectMapper();
-        this.originalOutputFileName = this.formatFileName("original");//"src/main/resources/generated" + this.fileName.substring(this.fileName.indexOf("/"));
-        this.noisyOutputFileName = this.formatFileName("noisy");//"src/main/resources/generated" + this.fileName.substring(this.fileName.indexOf("/"));
+        this.originalOutputFileName = this.formatFileName(config.getGeneratedDirectoryName(), "original");
+        this.noisyOutputFileName = this.formatFileName(config.getGeneratedDirectoryName(), "noisy");
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
 
-    private String formatFileName(String source) {
-        return "src/main/resources/generated/" + source + "_" + this.fileName.substring(this.fileName.indexOf("/")+1);
+    private String formatFileName(String directory, String source) {
+        return "src/main/resources/generated/" + directory + "/" + source + "_" + this.fileName.substring(this.fileName.indexOf("/")+1);
     }
 
     public void close() {
@@ -132,6 +133,7 @@ public class Dataset {
             newFile.delete();
         }
         try {
+            this.formatDirectory(newFile.getPath()).mkdirs();
             newFile.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -145,7 +147,7 @@ public class Dataset {
         }
     }
 
-    public BufferedInputStream getInputStream() {
-        return this.inputStream;
+    public File formatDirectory(String pathToFile) {
+        return new File(pathToFile.substring(0, pathToFile.lastIndexOf("/")));
     }
 }

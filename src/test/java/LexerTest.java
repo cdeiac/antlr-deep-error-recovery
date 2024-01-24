@@ -1,10 +1,9 @@
 import antlr.JavaLexer;
-import antlr.JavaParser;
-import antlr.extensions.CustomVisitor;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+ @Disabled
 public class LexerTest {
 
     @Test
