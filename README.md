@@ -1,6 +1,8 @@
 # antlr-deep-error-recovery
 
-## How to Run
+## How to Run
+
+This section contains instructions on how to run the experiments.
 
 ### Preparation
 Install the required tools using the <code>prepare_environment.sh</code> script. It validates and/or installs Java, Python, and Maven. Moreover, it packages the jar, initialises the Python virtual environment, installs the required packages, and creates the data folders.
