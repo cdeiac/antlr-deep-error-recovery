@@ -24,7 +24,7 @@ class TrainingSession:
     def __init_session(self):
         model = self.__init_model()
         start_fold = 0
-        if self.config.load_checkpoint is not None:
+        if self.config.load_checkpoint:
             model.load_state_dict(torch.load(self.config.checkpoint_path, map_location=self.config.device))
             start_fold = int(self.config.checkpoint_path[-4])
         optimiser = self.__init_optimiser(model)
