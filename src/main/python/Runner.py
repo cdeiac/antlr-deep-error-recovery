@@ -71,9 +71,9 @@ class Runner:
         for fold, (train_idx, test_ids) in enumerate(kfold.split(dataset)):
             test_original, test_noisy, test_nops = dataset.sub_sample(test_ids)
             train_original, train_noisy, train_nops = dataset.sub_sample(train_idx)
-            train_original, val_original = train_test_split(train_original)
-            train_noisy, val_noisy = train_test_split(train_noisy)
-            train_nops, val_nops = train_test_split(train_nops)
+            train_original, val_original = train_test_split(train_original, shuffle=False)
+            train_noisy, val_noisy = train_test_split(train_noisy, shuffle=False)
+            train_nops, val_nops = train_test_split(train_nops, shuffle=False)
             self.logger.info(
                 f'Fold {fold} completed: train size={len(train_noisy)}, '
                 f'validation size={len(val_noisy)}, '
