@@ -2,9 +2,8 @@ package dataset;
 
 import cli.Config;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dataset.json.DataContainer;
@@ -43,7 +42,7 @@ public class Dataset {
 
 
     private String formatFileName(String directory, String source) {
-        return "src/main/resources/generated/" + directory + "/" + source + "_" + this.fileName.substring(this.fileName.indexOf("/")+1);
+        return "src/main/resources/generated/" + directory + "/" + source + "_" + this.fileName.substring(this.fileName.lastIndexOf("/")+1);
     }
 
     public void close() {
@@ -72,14 +71,9 @@ public class Dataset {
         JsonFactory factory = new JsonFactory();
         List<DataContainer> jsonObjects = new ArrayList<>();
         try {
-            JsonParser parser = factory.createParser(this.getClass().getClassLoader().getResourceAsStream(fileName));
-            while (parser.nextToken() != null) {
-                if (JsonToken.START_OBJECT.equals(parser.getCurrentToken())) {
-                    DataContainer dataObject = this.mapper.readValue(parser, DataContainer.class);
-                    jsonObjects.add(dataObject);
-                }
-            }
-            parser.close();
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonObjects = objectMapper.readValue(new File(this.fileName), new TypeReference<>() {});
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
