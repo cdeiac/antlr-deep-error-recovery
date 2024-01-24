@@ -13,7 +13,7 @@ def parse_config():
     parser.add_argument('--load_cv',
                         nargs='?',
                         const=False,
-                        type=bool,
+                        type=str,
                         help='Whether or not to load existing CV splits to resume training')
     # model
     parser.add_argument('--load_checkpoint',
@@ -31,7 +31,7 @@ class Config:
         self.data_dir = args.data_dir
         self.data_path = f'src/main/resources/generated/{self.data_dir}/noisy_jhetas_clean.json'
         self.model_name = 'lstm_model'
-        self.load_checkpoint = args.load_checkpoint
+        self.load_checkpoint = True if args.load_checkpoint is not None and args.load_checkpoint == 'True' else False
         self.checkpoint_dir = f'src/main/python/data/generated/checkpoints/{self.data_dir}'
         self.checkpoint_path = max(glob.glob(self.checkpoint_dir + "/*"),
                                    key=os.path.getmtime) if self.load_checkpoint else None
@@ -40,5 +40,5 @@ class Config:
         self.log_dir = f'src/main/python/logs/{self.data_dir}'
         self.cache_dir = f'src/main/python/data/generated/cache/{self.data_dir}'
         self.cv_dir = f'src/main/python/data/generated/cv/{self.data_dir}'
-        self.load_cv = False if args.load_cv is None else True
+        self.load_cv = True if args.load_cv is not None and args.load_cv == 'True' else False
         self.seed = 11

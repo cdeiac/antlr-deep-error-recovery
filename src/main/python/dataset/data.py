@@ -41,8 +41,8 @@ def build_vocab(train_input, train_target, test_input, test_target):
     fill_corpus(corpus, test_input)
     fill_corpus(corpus, test_target)
     print(corpus)
-    token2idx = {'SOS': 0, 'EOS': 1, 'UNK': 2, 'PAD': 3}
-    idx2token = {0: 'SOS', 1: 'EOS', 2: 'UNK', 3: 'PAD'}
+    token2idx = {'SOS': 0, 'EOS': 1, 'PAD': 2}
+    idx2token = {0: 'SOS', 1: 'EOS', 2: 'PAD'}
     for word in corpus:
         if word not in token2idx:
             token2idx[word] = len(token2idx)
@@ -76,7 +76,7 @@ def vectorize(lookup, input):
 
 
 
-def generate_rolling_windows(x, y, target_dim=0, window_size=128, step_size=64, pad_value=3):
+def generate_rolling_windows(x, y, target_dim=0, window_size=128, step_size=64, pad_value=Token.PAD):
     # select the longer sequence
     pad_len = window_size - (max(x.shape[0], y.shape[0])) % window_size
     # pad sequence to match window size
@@ -186,7 +186,7 @@ def max_pad_tensors(list1, list2, list3, list4):
     return padded_list1, padded_list2, padded_list3, padded_list4
 
 
-def pad_tensors_to_max_length(list_of_tensors1, list_of_tensors2, padding_value=3):
+def pad_tensors_to_max_length(list_of_tensors1, list_of_tensors2, padding_value=Token.PAD):
     padded_list1 = []
     padded_list2 = []
 

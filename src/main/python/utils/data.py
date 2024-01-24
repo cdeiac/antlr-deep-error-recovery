@@ -7,7 +7,7 @@ import torch
 
 from config import Config
 from dataset.data import pad_tensors_to_max_length
-from dataset.dataset import DatasetLoader, UNK_TOKEN
+from dataset.dataset import DatasetLoader
 from dataset.token import Token
 
 
@@ -125,4 +125,3 @@ def get_by_token(token, token2index: dict):
         return token2index[token]
     except KeyError:
         print(f"Found OOV Word: {token}")
-        return Token.UNK

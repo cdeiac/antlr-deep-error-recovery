@@ -9,7 +9,6 @@ from dataset.token import Token
 
 SOS_TOKEN: str = 'SOS'
 EOS_TOKEN: str = 'EOS'
-UNK_TOKEN: str = 'UNK'
 PAD_TOKEN: str = 'PAD'
 index2token_path = 'src/main/python/persistent/index2token.json'
 token2index_path = 'src/main/python/persistent/token2index.json'
