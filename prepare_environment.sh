@@ -2,6 +2,14 @@
 
 initial_directory=$(pwd)
 
+# installation
+if command -v mvn &> /dev/null
+then
+  echo "Maven is already installed."
+else
+  sudo apt install -y maven
+fi
+
 # maven
 mvn clean package
 # python
