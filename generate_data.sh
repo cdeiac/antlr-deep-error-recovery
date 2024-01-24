@@ -11,6 +11,6 @@ data_path=$1
 probability=$2
 
 # noise generation
-target_directory=$(java -jar target/antlr-deep-error-recovery-1.0.0-SNAPSHOT-jar-with-dependencies.jar -d "$data_path" -p "$probability")
+target_directory=$(java -cp target/antlr-deep-error-recovery-1.0.0-SNAPSHOT-jar-with-dependencies.jar src/main/java/Runner.java -d "$data_path" -p "$probability")
 
 echo "$target_directory"
