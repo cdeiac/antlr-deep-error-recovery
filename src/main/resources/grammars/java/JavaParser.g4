@@ -31,7 +31,7 @@
 
 parser grammar JavaParser;
 
-options { tokenVocab=JavaLexer; }
+argumentParser { tokenVocab=JavaLexer; }
 
 compilationUnit
     : packageDeclaration? (importDeclaration | ';')* (typeDeclaration | ';')*

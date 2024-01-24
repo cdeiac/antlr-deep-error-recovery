@@ -29,15 +29,27 @@ public class NoiseGenerator {
      *  @param probability given probability (e.g., 0.1, 1.5, 3.0)
      *  @return generated tokens, or the same token if the probability did not apply
      */
-    public String[] processWithProbability(String token, double probability) {
+    public NoiseOperation processWithProbability(String token, double probability) {
         logger.debug("Process Token with probability {}", probability);
         int randomNumber = this.randomNoise.nextInt(1, 100 * FLOATING_POINT_CORRECTION);
         double smoothProbability = (int) (probability * FLOATING_POINT_CORRECTION);
+        String[] generatedToken = new String[]{token};
+        int noiseOperation = 0;
         if (randomNumber <= smoothProbability) {
-            return this.selectRandomNoiseStrategy().apply(token);
-        } else {
-            return new String[]{token};
+            NoiseStrategy noiseStrategy = this.selectRandomNoiseStrategy();
+
+            if (noiseStrategy instanceof Deletion) {
+                noiseOperation = 1;
+            }
+            if (noiseStrategy instanceof Insertion) {
+                noiseOperation = 2;
+            }
+            else if (noiseStrategy instanceof Modification) {
+                noiseOperation = 3;
+            }
+            generatedToken = noiseStrategy.apply(token);
         }
+        return new NoiseOperation(generatedToken, noiseOperation);
     }
 
     /**

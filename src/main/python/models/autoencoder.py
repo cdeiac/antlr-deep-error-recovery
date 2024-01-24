@@ -31,23 +31,26 @@ class Encoder(nn.Module):
         self.directions = 2 if bidirectional else 1
 
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_size)
-        self.fc1 = nn.Linear(self.embedding_size, self.fc1_size)
-        self.LSTM = nn.LSTM(self.fc1_size, self.hidden_size, self.num_layers, bidirectional=self.bidirectional)
+        #self.fc1 = nn.Linear(self.embedding_size, self.fc1_size)
+        self.LSTM = nn.LSTM(self.embedding_size, self.hidden_size, self.num_layers, bidirectional=self.bidirectional)
         self.fc2 = nn.Linear(self.hidden_size, self.latent_size)
+        self.dropout = nn.Dropout(p=0.2)
 
     def forward(self, x):
+        x = torch.flip(x, dims=(0,))
         # x: [seq_len] -> [seq_len, 1]
         x = x.unsqueeze(1)
         embedding = self.embedding(x)
-        fc1_out = self.fc1(embedding)
-        fc1_out = nn.functional.relu(fc1_out)
-        _, (h_s, _) = self.LSTM(fc1_out)
+        #fc1_out = self.fc1(embedding)
+        #fc1_out = nn.functional.relu(fc1_out)
+        _, (h_s, _) = self.LSTM(embedding)
         h_s_last = h_s.view(self.num_layers, self.directions, self.batch_size, self.hidden_size)[-1]
         if self.bidirectional:
             h_s_last = torch.cat((h_s_last[0], h_s_last[1]))
         else:
             h_s_last = h_s_last.squeeze(0)
-        return self.fc2(h_s_last) # [1, latent_size]
+        #return nn.functional.relu(self.fc2(h_s_last)) # [1, latent_size]
+        return self.dropout(self.fc2(h_s_last))  # [1, latent_size]
 
 
 class Decoder(nn.Module):
@@ -77,26 +80,40 @@ class Decoder(nn.Module):
         self.LSTM = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, bidirectional=self.bidirectional)
         self.fc_out = nn.Linear(self.hidden_size * 2 if self.bidirectional else self.hidden_size, self.vocab_size)
 
-    def forward(self, y, context_vector, tfr=0.0):
-        y_len = y.shape[0]
+    def forward(self, y, context_vector, stride, tfr=0.0):
+        if len(y.shape) == 0:
+            y_len = 1
+            current_token = y
+        else:
+            y_len = y.shape[0]
+            current_token = y[0]
         # set teacher forcing for whole sequence
         use_tf = random.random() < tfr
         # prepare output tensor
-        outputs = torch.zeros(y_len, self.vocab_size, dtype=torch.float32).to(self.device)
+        outputs = torch.zeros(y_len-1, self.vocab_size, dtype=torch.float32).to(self.device)
         # start with <SOS> token
-        current_token = y[0]
+        # current_token = y[0]
         # upscale context vector from latent_size to hidden_size
+        if not self.bidirectional:
+            context_vector = torch.mul(context_vector[0], context_vector[1]).unsqueeze(0)
+        context_vector = torch.cat([context_vector] * self.num_layers)
         context_vector = self.fc_upscale(context_vector) # shape: [1, latent_size] -> [1, hidden_size]
-        context_vector = torch.cat([context_vector] * self.num_layers) # shape: [num_layers, hidden_size]
+        #context_vector = torch.cat([context_vector] * self.num_layers) # shape: [num_layers, hidden_size]
         h_s = context_vector
         h_c = context_vector
         # TODO: Loop until a max size and add EOS termination condition when the model performs better!
-        for i in range(1, y_len):
+        #if not is_last_window:
+        #    predictions, (h_s, h_c) = self.__forward_iteration(current_token, h_s, h_c)
+        #    return predictions
+        for i in range(0, y_len-1):
             predictions, (h_s, h_c) = self.__forward_iteration(current_token, h_s, h_c)
             outputs[i] = predictions
-            best_guess = predictions.argmax(0)
+            prediction = predictions.argmax(0)
             # either pass the ground truth or the earlier predicted token
-            current_token = y[i] if use_tf else best_guess
+            current_token = y[i+1] if i < y_len-1 and use_tf else prediction
+            if i == stride-1:
+                # break early since we overwrite predictions longer than stride
+                break
         return outputs if self.training else torch.nn.functional.log_softmax(outputs, dim=1)
 
     def __forward_iteration(self, x, h_s_in, h_c_in):
@@ -126,9 +143,9 @@ class DenoisingAE(nn.Module):
             batch_size (int, optional): The batch size. Defaults to 1.
         """
         super(DenoisingAE, self).__init__()
-        self.encoder = Encoder(vocab_size, embedding_size, fc1_size, hidden_size, num_layers, latent_size, bidirectional)
+        self.encoder = Encoder(vocab_size, embedding_size, fc1_size, hidden_size, num_layers, latent_size, True)
         self.decoder = Decoder(batch_size, latent_size, hidden_size, num_layers, vocab_size, device, bidirectional)
 
-    def forward(self, x, y, tfr=0.0):
+    def forward(self, x, y, stride, tfr=0.0):
         context_vector = self.encoder(x)
-        return self.decoder(y, context_vector, tfr)
+        return self.decoder(y, context_vector, stride, tfr)
