@@ -1,9 +1,11 @@
 package dataset;
 
 import antlr.JavaLexer;
+import cli.Config;
 import dataset.json.DataContainer;
 import dataset.json.Entry;
 import dataset.noise.NoiseGenerator;
+import dataset.noise.NoiseOperation;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
@@ -17,14 +19,13 @@ import java.util.stream.Stream;
 public class Pipeline {
 
     private final Dataset dataset;
-    private final double[] probabilities;
+    private final double probability;
     private final NoiseGenerator noiseGenerator;
-    private static final String SYSTEM_LINE_SEPARATOR = System.getProperty("line.separator");
 
 
-    public Pipeline(String fileName, double[] probabilities, NoiseGenerator noiseGenerator) {
-        this.dataset = new Dataset(fileName);
-        this.probabilities = probabilities;
+    public Pipeline(Config config, NoiseGenerator noiseGenerator) {
+        this.dataset = new Dataset(config);
+        this.probability = config.getNoiseProbability();
         this.noiseGenerator = noiseGenerator;
     }
 
@@ -48,90 +49,38 @@ public class Pipeline {
                 tokenList.forEach(token -> originalTokens.add(javaLexer.getVocabulary().getSymbolicName(token.getType())));
                 String tokenizedFile  = String.join(" ", originalTokens);
                 DataContainer tokenizedContainer = new DataContainer(
-                        new Entry(container.getSource().getFile(), tokenizedFile, null),
+                        new Entry(container.getSource().getFile(), tokenizedFile, null, new int[]{}),
                         null
                 );
                 originalContainers.add(tokenizedContainer);
                 // add noisy sources
-                Arrays.stream(this.probabilities).forEach(probability -> {
-                    List<String> noisySource = new ArrayList<>();
-                    // split line by token
-                    tokenList.forEach(token -> {
-                        String[] noisyTokens = noiseGenerator.processWithProbability(
-                                javaLexer.getVocabulary().getSymbolicName(token.getType()),
-                                probability
-                        );
-                        noisySource.addAll(Arrays.asList(noisyTokens));
-                    });
-                    String noisyFile  = String.join(" ", noisySource);
-                    // only add if we generated noise for the given source file
-                    if (!tokenizedFile.equals(noisyFile)) {
-                        newContainers.add(new DataContainer(
-                                new Entry(tokenizedContainer.getSource().getFile(), tokenizedFile, noisyFile),
-                                null
-                        ));
-                    }
+                List<Integer> noiseOperations = new ArrayList<>();
+                List<String> noisySource = new ArrayList<>();
+                // split line by token
+                tokenList.forEach(token -> {
+                    NoiseOperation noiseOperation = noiseGenerator.processWithProbability(
+                            javaLexer.getVocabulary().getSymbolicName(token.getType()),
+                            probability
+                    );
+                    noisySource.addAll(Arrays.asList(noiseOperation.getToken()));
+                    noiseOperations.add(noiseOperation.getNoiseOperation());
                 });
+                String noisyFile  = String.join(" ", noisySource);
+                newContainers.add(new DataContainer(
+                        new Entry(
+                                tokenizedContainer.getSource().getFile(),
+                                tokenizedFile,
+                                noisyFile,
+                                noiseOperations.stream().mapToInt(i->i).toArray()
+                        ),
+                        null
+                ));
             });
         }
         // write original (tokenized) and noisy files
-        dataset.writeToOriginalFile(originalContainers);
+        //dataset.writeToOriginalFile(originalContainers);
         dataset.writeToNoisyFile(newContainers);
 
-    }
-
-    /**
-     *  Parse a file in the jsonl format and generate random noise according to the given probabilities
-     */
-    private void generateNoise() {
-        Arrays.stream(probabilities).forEach(probability -> {
-            try(Stream<DataContainer> lines = dataset.parseJSON()) {
-                lines.forEach(container -> {
-                    //JsonLine jsonLine = dataset.mapJsonLine(line.getSource().getSourceOriginal());
-                    StringBuilder newLine = new StringBuilder();
-
-                    Lexer javaLexer = this.newLexerInstanceForLanguage(container.getSource().getSourceOriginal());
-                    @SuppressWarnings("unchecked")
-                    List<Token> tokenList = (List<Token>) javaLexer.getAllTokens().stream()
-                            .toList();
-                    // split line by token
-                    tokenList.forEach(token -> {
-                        /*
-                        if (token.getText().contains(SYSTEM_LINE_SEPARATOR)) {
-                            newLine.append(" ");
-                        }
-                        else if (" ".equals(token)) {
-                            newLine.append(token);
-                        }
-                        else {*/
-                        if (token.getText().strip().equalsIgnoreCase("")) {
-                            return;
-                        }
-                        if (token.getText().equalsIgnoreCase(" ")) {
-                            newLine.append(" ");
-                        }
-
-                        else {
-                            newLine.append(javaLexer.getVocabulary().getSymbolicName(token.getType()));
-                            newLine.append(" ");
-
-                            String[] noisyTokens = noiseGenerator.processWithProbability(
-                                    javaLexer.getVocabulary().getSymbolicName(token.getType()),
-                                    probability
-                            );
-                            Arrays.stream(noisyTokens).forEach(nt -> {
-                                if (!(token.getText().equals(nt))) {
-                                    newLine.append(nt);
-                                    newLine.append(" ");
-                                }
-                            });
-                        }
-                    });
-                    //newContent.add(newLine.toString());
-                });
-            }
-        });
-        //dataset.writeToFile(newContent);
     }
 
     private Lexer newLexerInstanceForLanguage(String source) {
