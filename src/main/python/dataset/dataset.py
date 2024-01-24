@@ -23,7 +23,7 @@ class DatasetLoader(Dataset):
         self.token2index = {SOS_TOKEN: Token.SOS, EOS_TOKEN: Token.EOS, PAD_TOKEN: Token.PAD}
         self.index2token = {Token.SOS: SOS_TOKEN, Token.EOS: EOS_TOKEN, Token.PAD: PAD_TOKEN}
         self.n_token = 3
-        self.load_json_data(config.data_path)
+        self.load_json_data(config)
         # load static vocabularies to be consistent across all trials
         self.load_vocabs()
 
@@ -42,13 +42,14 @@ class DatasetLoader(Dataset):
             np.array(self.noisy_data)[idx], \
             np.asarray(self.noise_operations, dtype="object")[idx]
 
-    def load_json_data(self, filename):
-        with open(filename, 'r', encoding="utf8") as f:
-            json_data = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
-        for data in json_data:
-            self.original_data.append(self.enrich_with_control_tokens(data.source.source))
-            self.noisy_data.append(self.enrich_with_control_tokens(data.source.sourceWithNoise))
-            self.noise_operations.append(data.source.noiseOperations)
+    def load_json_data(self, config: Config):
+        if config.load_cv is False:
+            with open(config.data_path, 'r', encoding="utf8") as f:
+                json_data = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
+            for data in json_data:
+                self.original_data.append(self.enrich_with_control_tokens(data.source.source))
+                self.noisy_data.append(self.enrich_with_control_tokens(data.source.sourceWithNoise))
+                self.noise_operations.append(data.source.noiseOperations)
 
     def enrich_with_control_tokens(self, sourcefile):
         return f'{SOS_TOKEN} {sourcefile} {EOS_TOKEN}'
