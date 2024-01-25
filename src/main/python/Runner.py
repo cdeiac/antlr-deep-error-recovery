@@ -69,30 +69,27 @@ class Runner:
         kfold = KFold(n_splits=3, shuffle=True, random_state=self.config.seed)
         # split train and test data
         for fold, (train_idx, test_ids) in enumerate(kfold.split(dataset)):
-            test_original, test_noisy, test_nops = dataset.sub_sample(test_ids)
-            train_original, train_noisy, train_nops = dataset.sub_sample(train_idx)
+            # test fold
+            test_original = dataset.sub_sample_original(test_ids)
+            test_noisy = dataset.sub_sample_noisy(test_ids)
+            test_nops = dataset.sub_sample_nops(test_ids)
+            dump_data_and_cache(self.config, dataset, 'test', test_original, test_noisy, test_nops, fold)
+            del test_original, test_noisy, test_nops
+            self.logger.info(f'Fold {fold} test cache initialized')
+            # train and validation folds
+            train_original = dataset.sub_sample_original(train_idx)
             train_original, val_original = train_test_split(train_original, shuffle=False)
+            train_noisy = dataset.sub_sample_noisy(train_idx)
             train_noisy, val_noisy = train_test_split(train_noisy, shuffle=False)
+            train_nops = dataset.sub_sample_nops(train_idx)
             train_nops, val_nops = train_test_split(train_nops, shuffle=False)
-            self.logger.info(
-                f'Fold {fold} completed: train size={len(train_noisy)}, '
-                f'validation size={len(val_noisy)}, '
-                f'test size={len(test_noisy)}'
-            )
             dump_data_and_cache(self.config, dataset, 'train', train_original, train_noisy, train_nops, fold)
+            del train_original, train_noisy, train_nops
             self.logger.info(f'Fold {fold} train cache initialized')
             dump_data_and_cache(self.config, dataset, 'validation', val_original, val_noisy, val_nops, fold)
+            del val_original, val_noisy, val_nops
             self.logger.info(f'Fold {fold} validation cache initialized')
-            dump_data_and_cache(self.config, dataset, 'test', test_original, test_noisy, test_nops, fold)
-            self.logger.info(f'Fold {fold} test cache initialized')
-            # cleanup references
             gc.collect()
-            del test_original, test_noisy, test_nops, \
-                train_original, train_noisy, train_nops, \
-                val_original, val_noisy, val_nops
-
-    def split_train_validation_data(self, data: [], ):
-        return train_test_split(data, 0.1, shuffle=False)
 
     def __set_seed(self):
         self.logger.info(f'Setting seed to {self.config.seed}')

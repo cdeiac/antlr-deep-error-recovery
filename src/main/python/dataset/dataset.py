@@ -36,10 +36,14 @@ class DatasetLoader(Dataset):
             'noise_operations': self.noise_operations[idx]
         }
 
-    def sub_sample(self, idx):
-        return np.array(self.original_data)[idx], \
-            np.array(self.noisy_data)[idx], \
-            np.asarray(self.noise_operations, dtype="object")[idx]
+    def sub_sample_original(self, idx):
+        return [self.original_data[i] for i in idx]
+
+    def sub_sample_noisy(self, idx):
+        return [self.noisy_data[i] for i in idx]
+
+    def sub_sample_nops(self, idx):
+        return [self.noise_operations[i] for i in idx]
 
     def load_json_data(self, config: Config):
         if config.load_cv is False:
