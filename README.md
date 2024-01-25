@@ -26,7 +26,7 @@ To read the measurements and for reproducibility, the process creates the follow
     │   └── python
     │       └── data
     │       │   └── generated
-    │       │      └── cache
+    │       │       └── cache
     │       │       │   └── <NOISE_DIR>        # directory containing cross-validation folds in Pickle format (used for training)
     │       │       └── checkpoints
     │       │       │   └── <NOISE_DIR>        # directory containing PyTorch checkpoints
