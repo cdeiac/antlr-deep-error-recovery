@@ -9,7 +9,6 @@ public class Entry {
     @JsonProperty
     private File file;
     @JsonProperty("source")
-    //@JsonDeserialize(using = SourceFormatter.class)
     private String sourceOriginal;
 
     @JsonProperty("sourceWithNoise")

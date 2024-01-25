@@ -1,7 +1,6 @@
 package dataset;
 
 import cli.Config;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,15 +8,8 @@ import dataset.json.DataContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -25,94 +17,29 @@ public class Dataset {
 
     private final static Logger logger = LoggerFactory.getLogger(Dataset.class);
     private final String fileName;
-    private final String originalOutputFileName;
     private final String noisyOutputFileName;
     private final ObjectMapper mapper;
-    private BufferedInputStream inputStream;
 
 
     public Dataset(Config config) {
         this.fileName = config.getDataPath();
         this.mapper = new ObjectMapper();
-        this.originalOutputFileName = this.formatFileName(config.getGeneratedDirectoryName(), "original");
-        this.noisyOutputFileName = this.formatFileName(config.getGeneratedDirectoryName(), "noisy");
+        this.noisyOutputFileName = this.formatFileName(config.getGeneratedDirectoryName());
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
 
-    private String formatFileName(String directory, String source) {
-        return "src/main/resources/generated/" + directory + "/" + source + "_" + this.fileName.substring(this.fileName.lastIndexOf("/")+1);
-    }
-
-    public void close() {
-        try {
-            this.inputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     *  Loads the dataset from classpath
-     *
-     */
-    public Stream<String> loadFile() {
-        try {
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(fileName);
-            URL resource = Dataset.class.getClassLoader().getResource(fileName);
-            return Files.lines(Paths.get(resource.toURI()));
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    private String formatFileName(String directory) {
+        return "src/main/resources/generated/" + directory + "/" + "noisy_" + this.fileName.substring(this.fileName.lastIndexOf("/")+1);
     }
 
     public Stream<DataContainer> parseJSON() {
-        List<DataContainer> jsonObjects = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            jsonObjects = objectMapper.readValue(new File(this.fileName), new TypeReference<>() {});
-
+            List<DataContainer> jsonObjects = objectMapper.readValue(new File(this.fileName), new TypeReference<>() {});
+            return jsonObjects.stream();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-        return jsonObjects.stream();
-    }
-
-    public JsonLine mapJsonLine(String line) {
-        try {
-            return mapper.readValue(line, JsonLine.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public DataContainer mapContainer(String line) {
-        try {
-            return this.mapper.readValue(line, DataContainer.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     *  Save original tokenized dataset
-     */
-    public void writeToOriginalFile(List<DataContainer> containers) {
-        File newFile = new File(this.originalOutputFileName);
-        if (newFile.exists()) {
-            newFile.delete();
-        }
-        try {
-            newFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            this.mapper.writer().writeValue(new File(this.originalOutputFileName), containers);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            logger.debug("Created original file: " + this.originalOutputFileName);
         }
     }
 

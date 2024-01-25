@@ -32,7 +32,6 @@ public class Pipeline {
 
     public void run() {
         //this.generateNoise();
-        List<DataContainer> originalContainers = new ArrayList<>();
         List<DataContainer> newContainers = new ArrayList<>();
 
         try(Stream<DataContainer> containers = dataset.parseJSON()) {
@@ -52,7 +51,6 @@ public class Pipeline {
                         new Entry(container.getSource().getFile(), tokenizedFile, null, new int[]{}),
                         null
                 );
-                originalContainers.add(tokenizedContainer);
                 // add noisy sources
                 List<Integer> noiseOperations = new ArrayList<>();
                 List<String> noisySource = new ArrayList<>();
@@ -77,10 +75,7 @@ public class Pipeline {
                 ));
             });
         }
-        // write original (tokenized) and noisy files
-        //dataset.writeToOriginalFile(originalContainers);
         dataset.writeToNoisyFile(newContainers);
-
     }
 
     private Lexer newLexerInstanceForLanguage(String source) {
