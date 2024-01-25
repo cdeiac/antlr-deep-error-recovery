@@ -9,10 +9,10 @@ from models.lstm import LSTMDenoiser
 class TrainingSession:
 
     def __init__(self, config: Config, vocab_size):
-        self.max_epochs = 100
+        self.max_epochs = 10
         self.vocab_size = vocab_size
         self.embedding_dim = 128
-        self.hidden_size = 64
+        self.hidden_size = 16
         self.num_layers = 1
         self.bidirectional = True
         self.config = config
