@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 from typing import Optional
 
@@ -58,8 +59,11 @@ def dump_data_and_cache(
         nops: [],
         fold_id: Optional[int] = None
 ):
-    with open(get_filepath_for_fold(config, fold_id, datatype), 'w') as json_file, \
-            open(get_filepath_for_fold_cache(config, fold_id, datatype), 'wb') as pickle_file:
+    json_file_path = get_filepath_for_fold(config, fold_id, datatype)
+    pickle_file_path = get_filepath_for_fold_cache(config, fold_id, datatype)
+    os.remove(json_file_path)
+    os.remove(pickle_file_path)
+    with open(json_file_path, 'a') as json_file, open(pickle_file_path, 'ab') as pickle_file:
         for orig, nois, nop in zip(original, noisy, nops):
             json.dump({
                 "original_data": orig,
