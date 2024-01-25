@@ -1,7 +1,6 @@
 package dataset;
 
 import cli.Config;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -68,7 +67,6 @@ public class Dataset {
     }
 
     public Stream<DataContainer> parseJSON() {
-        JsonFactory factory = new JsonFactory();
         List<DataContainer> jsonObjects = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
