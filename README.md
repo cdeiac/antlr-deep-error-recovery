@@ -39,3 +39,4 @@ To read the measurements and for reproducibility, the process creates the follow
             └── <NOISE_DIR>
                 └── noisy_jhetas_clean.json    # the generated source file with added noise
 ```
+Here ```<NOISE_DIR>``` denotes the target directory returned by the noise generation task.
