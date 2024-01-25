@@ -66,8 +66,12 @@ def dump_data_and_cache(
 ):
     json_file_path = get_filepath_for_fold(config, fold_id, datatype)
     pickle_file_path = get_filepath_for_fold_cache(config, fold_id, datatype)
-    os.remove(json_file_path)
-    os.remove(pickle_file_path)
+    # cleanup old files
+    try:
+        os.remove(json_file_path)
+        os.remove(pickle_file_path)
+    except OSError:
+        pass
     with open(json_file_path, 'a') as json_file, open(pickle_file_path, 'ab') as pickle_file:
         for orig, nois, nop in zip(original, noisy, nops):
             json.dump({
