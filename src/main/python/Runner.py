@@ -74,20 +74,18 @@ class Runner:
             test_noisy = dataset.sub_sample_noisy(test_ids)
             test_nops = dataset.sub_sample_nops(test_ids)
             dump_data_and_cache(self.config, dataset, 'test', test_original, test_noisy, test_nops, fold)
-            del test_original, test_noisy, test_nops
             self.logger.info(f'Fold {fold} test cache initialized')
             # train and validation folds
-            train_original = dataset.sub_sample_original(train_idx)
-            train_original, val_original = train_test_split(train_original, shuffle=False)
-            train_noisy = dataset.sub_sample_noisy(train_idx)
-            train_noisy, val_noisy = train_test_split(train_noisy, shuffle=False)
-            train_nops = dataset.sub_sample_nops(train_idx)
-            train_nops, val_nops = train_test_split(train_nops, shuffle=False)
+            train_train_idx, train_val_idx = train_test_split(train_idx.tolist(), shuffle=False)
+            train_original = dataset.sub_sample_original(train_train_idx)
+            train_noisy = dataset.sub_sample_noisy(train_train_idx)
+            train_nops = dataset.sub_sample_nops(train_train_idx)
             dump_data_and_cache(self.config, dataset, 'train', train_original, train_noisy, train_nops, fold)
-            del train_original, train_noisy, train_nops
             self.logger.info(f'Fold {fold} train cache initialized')
+            val_original = dataset.sub_sample_original(train_val_idx)
+            val_noisy = dataset.sub_sample_noisy(train_val_idx)
+            val_nops = dataset.sub_sample_nops(train_val_idx)
             dump_data_and_cache(self.config, dataset, 'validation', val_original, val_noisy, val_nops, fold)
-            del val_original, val_noisy, val_nops
             self.logger.info(f'Fold {fold} validation cache initialized')
             gc.collect()
 
