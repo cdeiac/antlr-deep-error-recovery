@@ -11,6 +11,8 @@ class LSTMDenoiser(nn.Module):
 
     def forward(self, x):
         embedded = self.embedding(x)
+        #embedded = torch.nn.functional.relu(embedded)
         output, _ = self.lstm(embedded)
+        #output = torch.nn.functional.relu(output)
         output = self.linear(output)
         return output if self.training else torch.nn.functional.log_softmax(output, dim=1)
