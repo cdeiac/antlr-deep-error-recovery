@@ -27,21 +27,26 @@ def dump_json(filename: str, original, noisy, nops):
 
 def load_cache(config: Config, fold_id: int):
     # training
-    with open(get_filepath_for_fold_cache(config, fold_id, 'train'), 'rb') as f:
-        data = pickle.load(f)
-    train_original = data['original']
-    train_noisy = data['noisy']
+    train_original, train_noisy = load_cache_of_type(config, fold_id, 'train')
     # validation
-    with open(get_filepath_for_fold_cache(config, fold_id, 'validation'), 'rb') as f:
-        data = pickle.load(f)
-    val_original = data['original']
-    val_noisy = data['noisy']
+    val_original, val_noisy = load_cache_of_type(config, fold_id, 'validation')
     # test
-    with open(get_filepath_for_fold_cache(config, fold_id, 'test'), 'rb') as f:
-        data = pickle.load(f)
-    test_original = data['original']
-    test_noisy = data['noisy']
+    test_original, test_noisy = load_cache_of_type(config, fold_id, 'test')
     return train_original, train_noisy, val_original, val_noisy, test_original, test_noisy
+
+
+def load_cache_of_type(config: Config, fold_id: int, datatype: str):
+    original = []
+    noisy = []
+    with open(get_filepath_for_fold_cache(config, fold_id, datatype), 'rb') as f:
+        while True:
+            try:
+                d = pickle.load(f)
+                original.append(d['original'])
+                noisy.append(d['original'])
+            except EOFError:
+                break
+    return original, noisy
 
 
 def dump_cache(filename: str, original: [], noisy: []):
