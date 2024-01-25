@@ -16,3 +16,26 @@ The script returns the target directory where the noisy file is generated like s
 
 ### Data Preparation & Model Training
 Lastly, execute the <code>./train_model.sh</code> script and provide the following options: the directory of the noisy data, whether to load existing CV splits, and whether to resume training by loading an existing checkpoint. An example execution: <code>./train_model.sh 00_1 False False</code> if you want to load existing splits from the cache provide <code>True</code> as the second option and to load a checkpoint provide <code>True</code> as last parameter.
+
+### Generated Folders
+To read the measurements and for reproducibility, the process creates the following folders:
+```
+.
+└── src
+    ├── main
+    │   └── python
+    │       └── data
+    │       │   └── generated
+    │       │      └── cache
+    │       │       │   └── <NOISE_DIR>        # directory containing cross-validation folds in Pickle format (used for training)
+    │       │       └── checkpoints
+    │       │       │   └── <NOISE_DIR>        # directory containing PyTorch checkpoints
+    │       │       └── cv
+    │       │           └── <NOISE_DIR>        # directory containing cross-validation folds in JSON format
+    │       └── logs
+    │           └── <NOISE_DIR>                # directory containing log files, and accuracy/loss scores in JSON format    
+    └── resources
+        └── generated
+            └── <NOISE_DIR>
+                └── noisy_jhetas_clean.json    # the generated source file with added noise
+```
