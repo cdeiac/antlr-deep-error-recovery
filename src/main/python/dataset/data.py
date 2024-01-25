@@ -186,19 +186,10 @@ def max_pad_tensors(list1, list2, list3, list4):
     return padded_list1, padded_list2, padded_list3, padded_list4
 
 
-def pad_tensors_to_max_length(list_of_tensors1, list_of_tensors2, padding_value=Token.PAD):
-    padded_list1 = []
-    padded_list2 = []
-
-    for tensor1, tensor2 in zip(list_of_tensors1, list_of_tensors2):
-        # Find the maximum length
-        max_length = max(len(tensor1), len(tensor2))
-
-        # Pad the tensors to the maximum length
-        tensor1_padded = torch.nn.functional.pad(tensor1, pad=(0, max_length - len(tensor1)), mode='constant', value=padding_value)
-        tensor2_padded = torch.nn.functional.pad(tensor2, pad=(0, max_length - len(tensor2)), mode='constant', value=padding_value)
-
-        padded_list1.append(tensor1_padded)
-        padded_list2.append(tensor2_padded)
-
-    return padded_list1, padded_list2
+def pad_tensors_to_max_length(tensor1, tensor2, padding_value=Token.PAD):
+    # Find the maximum length
+    max_length = max(len(tensor1), len(tensor2))
+    # Pad the tensors to the maximum length
+    tensor1_padded = torch.nn.functional.pad(tensor1, pad=(0, max_length - len(tensor1)), mode='constant', value=padding_value)
+    tensor2_padded = torch.nn.functional.pad(tensor2, pad=(0, max_length - len(tensor2)), mode='constant', value=padding_value)
+    return tensor1_padded, tensor2_padded

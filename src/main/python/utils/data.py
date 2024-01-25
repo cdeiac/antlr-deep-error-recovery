@@ -4,11 +4,9 @@ from typing import Optional
 
 import torch
 
-
 from config import Config
 from dataset.data import pad_tensors_to_max_length
 from dataset.dataset import DatasetLoader
-from dataset.token import Token
 
 
 def load_json(filename: str):
@@ -16,9 +14,14 @@ def load_json(filename: str):
         return json.load(f)
 
 
-def dump_json(filename: str, obj):
+def dump_json(filename: str, original, noisy, nops):
     with open(filename, 'w') as f:
-        json.dump(obj, f)
+        for orig, nois, nop in zip(original, noisy, nops):
+            json.dump({
+                "original_data": orig,
+                "noisy_data": nois,
+                "noise_operations": nop
+            }, f)
 
 
 def load_cache(config: Config, fold_id: int):
@@ -55,28 +58,35 @@ def dump_data_and_cache(
         nops: [],
         fold_id: Optional[int] = None
 ):
-    dump_json(get_filepath_for_fold(config, fold_id, datatype), format_data_for_dump(original, noisy, nops))
-    # encode and create tensors before dumping cache
-    original = encode_and_to_tensor(config, original, dataset.token2index)
-    noisy = encode_and_to_tensor(config, noisy, dataset.token2index)
-    # pad both sequences to be of the length
-    original, noisy = pad_tensors_to_max_length(noisy, original)
-    dump_cache(get_filepath_for_fold_cache(config, fold_id, datatype), original, noisy)
+    with open(get_filepath_for_fold(config, fold_id, datatype), 'w') as json_file, \
+            open(get_filepath_for_fold_cache(config, fold_id, datatype), 'wb') as pickle_file:
+        for orig, nois, nop in zip(original, noisy, nops):
+            json.dump({
+                "original_data": orig,
+                "noisy_data": nois,
+                "noise_operations": nop
+            }, json_file)
+            orig = encode_and_to_tensor(config, orig, dataset.token2index)
+            nois = encode_and_to_tensor(config, nois, dataset.token2index)
+            # pad both sequences to be of the length
+            orig, nois = pad_tensors_to_max_length(nois, orig)
+            # dump cache
+            pickle.dump({'original': orig, 'noisy': nois}, pickle_file)
 
 
 def format_data_for_dump(original: [], noisy: [], nops: []):
     dump = []
-    for i in range(len(original)):
+    for orig, nois, nop in zip(original, noisy, nops):
         dump.append({
-            "original_data": original[i],
-            "noisy_data": noisy[i],
-            "noise_operations": nops[i]
+            "original_data": orig,
+            "noisy_data": nois,
+            "noise_operations": nop
         })
     return dump
 
 
 def save_training_logs(config: Config, logs: {}):
-    dump_json(f'{config.log_dir}/scores.json',logs)
+    dump_json(f'{config.log_dir}/scores.json', logs)
 
 
 def format_scores(
@@ -103,17 +113,11 @@ def get_filepath_for_fold_cache(config: Config, fold_id: int, datatype: str):
     return f'{config.cache_dir}/fold_{fold_id}_{datatype}.pickle'
 
 
-def encode_and_to_tensor(config: Config, data: [], token2index: dict):
-    encoded_data = []
-    tensor_data = []
-    for i, d in enumerate(data):
-        encoded_sourcefile = []
-        sourcefile = data[i].split()
-        for token in sourcefile:
-            encoded_sourcefile.append(get_by_token(token, token2index))
-        encoded_data.append(encoded_sourcefile)
-        tensor_data.append(torch.tensor(encoded_data[i], device=config.device).long())
-    return tensor_data
+def encode_and_to_tensor(config: Config, sourcefile: [], token2index: dict):
+    encoded_sourcefile = []
+    for token in sourcefile.split():
+        encoded_sourcefile.append(get_by_token(token, token2index))
+    return torch.tensor(encoded_sourcefile, device=config.device).long()
 
 
 def to_tensor(list_data, device):

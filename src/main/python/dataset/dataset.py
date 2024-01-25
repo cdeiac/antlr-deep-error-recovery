@@ -37,13 +37,16 @@ class DatasetLoader(Dataset):
         }
 
     def sub_sample_original(self, idx):
-        return [self.original_data[i] for i in idx]
+        for i in idx:
+            yield self.original_data[i]
 
     def sub_sample_noisy(self, idx):
-        return [self.noisy_data[i] for i in idx]
+        for i in idx:
+            yield self.noisy_data[i]
 
     def sub_sample_nops(self, idx):
-        return [self.noise_operations[i] for i in idx]
+        for i in idx:
+            yield self.noise_operations[i]
 
     def load_json_data(self, config: Config):
         if config.load_cv is False:
