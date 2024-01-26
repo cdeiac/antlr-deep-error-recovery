@@ -34,8 +34,8 @@ for noise_level in "${noise_levels[@]}"; do
     rm -rf "src/main/python/logs/$data_dir/"
     zip -r "src/main/python/data/generated/cache/$data_dir.zip" "src/main/python/data/generated/cache/$data_dir/"
     rm -rf "src/main/python/data/generated/cache/$data_dir/"
-    zip -r "src/main/python/data/generated/cache/checkpoints/$data_dir.zip" "src/main/python/data/generated/cache/checkpoints/$data_dir/"
-    rm -rf "src/main/python/data/generated/cache/checkpoints/$data_dir/"
+    zip -r "src/main/python/data/generated/checkpoints/$data_dir.zip" "src/main/python/data/generated/checkpoints/$data_dir/"
+    rm -rf "src/main/python/data/generated/checkpoints/$data_dir/"
     zip -r "src/main/python/data/generated/cv/$data_dir.zip" "src/main/python/data/generated/cv/$data_dir/"
     rm -rf "src/main/python/data/generated/cv/$data_dir/"
 done
