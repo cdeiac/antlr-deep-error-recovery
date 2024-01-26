@@ -1,16 +1,32 @@
 #!/bin/bash
 
-# Check if the required parameters are provided
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <data_path> <probability>"
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <data_path> <noise_levels>"
     exit 1
 fi
 
-# Store the parameters in variables
 data_path=$1
-probability=$2
+shift
 
-# noise generation
-target_directory=$(java -jar target/antlr-deep-error-recovery-1.0.0-SNAPSHOT-jar-with-dependencies.jar -d "$data_path" -p "$probability")
-# data preparation and training
-python src/main/python/main.py --data_dir=$target_directory
+if [ "$#" -lt 1 ]; then
+    echo "Please provide at least one noise level"
+    exit 1
+fi
+
+noise_levels=("$@")
+
+for noise_level in "${noise_levels[@]}"; do
+    # generate noisy dataset
+    data_dir=$(./generate_data.sh "$data_path" "$noise_level")
+    # train model on noisy data
+    ./train_model.sh --_load_cv=False --load_checkpoint=False "$data_dir"
+    # zip and cleanup
+    zip -r "logs_$data_dir.zip" "src/main/python/logs/$data_dir/"
+    rm -rf "src/main/python/logs/$data_dir/"
+    zip -r "cache_$data_dir.zip" "src/main/python/data/generated/cache/$data_dir/"
+    rm -rf "src/main/python/data/generated/cache/$data_dir/"
+    zip -r "checkpoints_$data_dir.zip" "src/main/python/data/generated/cache/checkpoints/$data_dir/"
+    rm -rf "src/main/python/data/generated/cache/checkpoints/$data_dir/"
+    zip -r "cv_$data_dir.zip" "src/main/python/data/generated/cv/$data_dir/"
+    rm -rf "src/main/python/data/generated/cv/$data_dir/"
+done
