@@ -26,7 +26,7 @@ def dump_json(filename: str, original, noisy, nops):
 
 
 def dump_scores(filename: str, scores):
-    with open(filename, 'a') as f:
+    with open(filename, 'w') as f:
         json.dump(scores, f)
 
 
