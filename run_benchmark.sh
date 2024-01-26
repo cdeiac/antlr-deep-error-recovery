@@ -21,12 +21,12 @@ for noise_level in "${noise_levels[@]}"; do
     # train model on noisy data
     ./train_model.sh --_load_cv=False --load_checkpoint=False "$data_dir"
     # zip and cleanup
-    zip -r "logs_$data_dir.zip" "src/main/python/logs/$data_dir/"
+    zip -r "src/main/python/logs/$data_dir.zip" "src/main/python/logs/$data_dir/"
     rm -rf "src/main/python/logs/$data_dir/"
-    zip -r "cache_$data_dir.zip" "src/main/python/data/generated/cache/$data_dir/"
+    zip -r "src/main/python/data/generated/cache/$data_dir.zip" "src/main/python/data/generated/cache/$data_dir/"
     rm -rf "src/main/python/data/generated/cache/$data_dir/"
-    zip -r "checkpoints_$data_dir.zip" "src/main/python/data/generated/cache/checkpoints/$data_dir/"
+    zip -r "src/main/python/data/generated/cache/checkpoints/$data_dir.zip" "src/main/python/data/generated/cache/checkpoints/$data_dir/"
     rm -rf "src/main/python/data/generated/cache/checkpoints/$data_dir/"
-    zip -r "cv_$data_dir.zip" "src/main/python/data/generated/cv/$data_dir/"
+    zip -r "src/main/python/data/generated/cv/$data_dir.zip" "src/main/python/data/generated/cv/$data_dir/"
     rm -rf "src/main/python/data/generated/cv/$data_dir/"
 done
