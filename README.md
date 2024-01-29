@@ -9,8 +9,13 @@ Install the required tools using the <code>prepare_environment.sh</code> script.
 
 Next, make sure that you place the original data file in the following directory: <code>src/main/resources/data</code>
 
+### Running the whole Pipeline at once
+Execute the <code>./run_benchmark.sh</code> script if you want to run the steps documented below at once. This script additionally zips and removes the data directories that we want to persist. Moreover, the script accepts multiple noise levels (in addition to the data file location which is the first parameter) to be executed in series. An example usage: <code>./run_benchmark src/main/resources/data/jhetas_clean.json 0.1 0.2 0.4 0.8 1.6 3.2 6.4 12.8</code>. This command repeats the whole pipeline with noise levels 0.1, 0.2, ..., 12.8.
+
+If you want to execute pipeline tasks manually, proceed with the following instructions.
+
 ### Noise Generation
-Now you can run the noisy data generation by executing the <code>generate_data.sh</code> script with the path of the original data and the noise percentage. Here is an example call: <code>./generate_data.sh src/main/resources/data/jhetas_clean.json 0.1</code>
+To run the noisy data generation you may execute the <code>generate_data.sh</code> script with the path of the original data and the noise percentage. Here is an example call: <code>./generate_data.sh src/main/resources/data/jhetas_clean.json 0.1</code>
 
 The script returns the target directory where the noisy file is generated like so: <code>00_1</code>, which indicates the sub-directory for the given noise level. This sub-directory is needed for the next step, such that the next script knows where the noisy data was generated.
 
