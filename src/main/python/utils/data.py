@@ -25,6 +25,11 @@ def dump_json(filename: str, original, noisy, nops):
             }, f)
 
 
+def dump_scores(filename: str, scores):
+    with open(filename, 'w') as f:
+        json.dump(scores, f)
+
+
 def load_cache(config: Config, fold_id: int):
     # training
     train_original, train_noisy = load_cache_of_type(config, fold_id, 'train')
@@ -99,7 +104,7 @@ def format_data_for_dump(original: [], noisy: [], nops: []):
 
 
 def save_training_logs(config: Config, logs: {}):
-    dump_json(f'{config.log_dir}/scores.json', logs)
+    dump_scores(f'{config.log_dir}/scores.json', logs)
 
 
 def format_scores(
