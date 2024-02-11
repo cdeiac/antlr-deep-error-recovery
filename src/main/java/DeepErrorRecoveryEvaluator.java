@@ -14,7 +14,6 @@ import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
 import ai.djl.util.JsonUtils;
 import ai.djl.util.Utils;
-import antlr.errorrecovery.ERPredictor;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,7 @@ public class DeepErrorRecovery {
 
 
     public static void main(String[] args) throws Exception {
+        /*
         var predictor = ERPredictor.load("src/main/python/data/generated/checkpoints/00_1/traced_model.pt");
         int[] input = exampleInput();
         int numPredictions = 16;
@@ -48,6 +48,8 @@ public class DeepErrorRecovery {
             var result = predictor.predict(input);
             System.out.println(result);
         }
+
+         */
     }
 
     public static int[] exampleInput() {
