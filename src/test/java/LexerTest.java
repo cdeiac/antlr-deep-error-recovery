@@ -1,8 +1,8 @@
 import antlr.JavaLexer;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.Vocabulary;
+import antlr.JavaParser;
+import antlr.converters.ANTLRDataConverter;
+import antlr.converters.ANTLRPlaceholderToken;
+import org.antlr.v4.runtime.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -30,11 +30,35 @@ public class LexerTest {
 
     @Test
     public void test_with_single_token() {
-        String javaClassContent = "int";
+        String javaClassContent = "IDENTIFIER DOT ASSIGN LT LPARAM";
         JavaLexer javaLexer = new JavaLexer(CharStreams.fromString(javaClassContent));
+        CommonTokenFactory factory = new CommonTokenFactory();
+        javaLexer.setTokenFactory(factory);
+
+        //CommonTokenStream tokenStream = new CommonTokenStream(new CommonToken(1).getInputStream());
+        //Token newToken = javaLexer.getTokenFactory().create(1, "ABSTRACT");
         CommonTokenStream tokens = new CommonTokenStream(javaLexer);
+        var lexedTokens = javaLexer.getAllTokens();
+
+        JavaParser parser = new JavaParser(tokens);
+
         assertNotNull(tokens);
     }
+
+     @Test
+     public void test_with_encoded_ids() {
+        String originalData = "LINE_COMMENT LINE_COMMENT LINE_COMMENT LINE_COMMENT LINE_COMMENT CLASS IDENTIFIER LBRACE PUBLIC INT IDENTIFIER LPAREN INT IDENTIFIER RPAREN LBRACE WHILE LPAREN IDENTIFIER GE DECIMAL_LITERAL RPAREN LBRACE INT IDENTIFIER ASSIGN DECIMAL_LITERAL SEMI WHILE LPAREN IDENTIFIER GT DECIMAL_LITERAL RPAREN LBRACE IDENTIFIER ADD_ASSIGN IDENTIFIER MOD DECIMAL_LITERAL SEMI IDENTIFIER DIV_ASSIGN DECIMAL_LITERAL SEMI RBRACE IDENTIFIER ASSIGN IDENTIFIER SEMI RBRACE RETURN IDENTIFIER SEMI RBRACE RBRACE";
+        int[] input = ANTLRDataConverter.mapTokenToIds(originalData);
+        //List<Integer> ints = List.of(35, 9, 128, 80, 81); // public class Dummy { }
+        String dummyInput = ANTLRPlaceholderToken.replaceSourceWithDummyTokens(input);
+        JavaLexer javaLexer = new JavaLexer(CharStreams.fromString(dummyInput));
+        CommonTokenStream tokens = new CommonTokenStream(javaLexer);
+
+        JavaParser parser = new JavaParser(tokens);
+        parser.compilationUnit();
+
+        assertNotNull(tokens);
+     }
 
     @Test
     public void test_get_token_by_name() {

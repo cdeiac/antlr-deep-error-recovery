@@ -6,7 +6,7 @@ import ai.djl.translate.Batchifier;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
 
-public class ERModelTranslator implements Translator<int[], NDArray> {
+public class JavaOracleTranslator implements Translator<int[], NDArray> {
 
     @Override
     public NDArray processOutput(TranslatorContext translatorContext, NDList ndList) {

@@ -6,15 +6,19 @@ import ai.djl.translate.Batchifier;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
 
-public class ERModelTranslator implements Translator<int[], NDArray> {
+import java.util.Arrays;
+
+public class ERModelTop1Translator implements Translator<int[], int[]> {
 
     @Override
-    public NDArray processOutput(TranslatorContext translatorContext, NDList ndList) {
+    public int[] processOutput(TranslatorContext translatorContext, NDList ndList) {
         // output dimensions: [seq_len, vocab_size]
         // do not compute argmax since we want to retrieve k-most probable tokens for feedback mechanism
-        NDArray output = ndList.singletonOrThrow();//.argMax(1);
-
-        return output;
+        NDArray output = ndList.singletonOrThrow().argMax(1);
+        // transform output
+        return Arrays.stream(output.toLongArray())
+                .mapToInt(Math::toIntExact)
+                .toArray();
     }
 
     @Override
