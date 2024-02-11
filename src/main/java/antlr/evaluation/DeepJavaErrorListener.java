@@ -1,26 +1,36 @@
 package antlr.evaluation;
 
-import antlr.converters.ANTLRDataConverter;
-import antlr.converters.ANTLRPlaceholderToken;
 import org.antlr.v4.runtime.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class JavaDeepErrorListener extends BaseErrorListener {
+public class DeepJavaErrorListener extends BaseErrorListener {
 
     private final List<Token> tokenList;
-    private List<Token> reconstructedList = new ArrayList<>();
+    private int addedTokens = 0;
+    private List<Token> reconstructedList;
+    private int[] modelOutput;
     private List<CompilationError> compilationErrorList = new ArrayList<>();
-    private int netModifications = 0;
+    private int correctionIndex = 0;
+    private HashMap<Integer, Token> replacements = new HashMap<>();
+    private HashMap<Integer, Token> additions = new HashMap<>();
+    private HashMap<Integer, Token> deletions = new HashMap<>();
 
 
-    public JavaDeepErrorListener(List<Token> tokenStream) {
+
+    public DeepJavaErrorListener(List<Token> tokenStream, int[] antlrEncodedModelOutput) {
         this.tokenList = tokenStream.stream()
                 // filter out WS && EOF
                 .filter(t -> t.getType() != 125 && t.getType() != -1)
                 .toList();
-        reconstructedList.addAll(tokenList);
+        this.reconstructedList = new ArrayList<>(tokenList);
+        this.modelOutput = antlrEncodedModelOutput;
     }
 
 
@@ -34,12 +44,160 @@ public class JavaDeepErrorListener extends BaseErrorListener {
 
         int actualTokenIndex = this.getErrorTokenPositionOfTokenStream((Token) offendingSymbol);
         this.compilationErrorList.add(new CompilationError(msg, actualTokenIndex));
+/*
+        if (ErrorRecoveryType.ON_FILE.equals(errorRecoveryType)) {
+            // do nothing, we will later replace the whole sequence with the model output
+            return;
+        }
 
-        replaceTokenFromMessage(msg, actualTokenIndex);
+        if (msg == null) {
+            return;
+        }
+
+        if (actualTokenIndex != -1 && actualTokenIndex < modelOutput.length-1) {
+            //System.out.println(msg);
+            //System.out.println("Noisy: [" + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex+1).getType() + " , " +  "] , Model: [" + modelOutput[actualTokenIndex]+ ", " + modelOutput[actualTokenIndex+1] + "]");
+
+
+            //for (int i = actualTokenIndex; i < Math.min(modelOutput.length, reconstructedList.size()); i++) {
+            //    try {
+            //        if (modelOutput[i] != reconstructedList.get(i).getType()) {
+                        replaceTokenFromModelOutput(actualTokenIndex);
+            //            correctionIndex = i;
+            //        }
+           //     } catch (IndexOutOfBoundsException ex) {
+            //        break;
+            //    }
+            //}
+            int modelCurrent = modelOutput[actualTokenIndex];
+            int modelLA = modelOutput[actualTokenIndex + 1];
+            int seqCurrent = reconstructedList.get(actualTokenIndex).getType();
+            int seqLA = reconstructedList.get(actualTokenIndex + 1).getType();
+            // insert
+            //System.out.println("rec: [ " + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex+1).getType() + "] | model: [ " + modelOutput[actualTokenIndex] + ", " + modelOutput[actualTokenIndex+1] + "]" );
+            if (modelCurrent == seqCurrent) {
+                // do nothing
+            }
+            else if (seqCurrent == modelLA) {
+                //System.out.println("INSERT");
+                addTokenFromModelOutput(actualTokenIndex);
+            }
+            else if (seqLA == modelCurrent) {
+                //System.out.println("DELETE");
+                removeTokenFromModelOutput(actualTokenIndex);
+            }
+            else {//if (modelLA == seqLA) {
+                //System.out.println("MODIFY");
+                replaceTokenFromModelOutput(actualTokenIndex);
+            }
+
+
+
+        }
+        else {
+            // if model has more tokens, we add them
+            if (modelOutput.length > reconstructedList.size()) { // correctionIndex < modelOutput.length &&
+                int tokensToAdd = modelOutput.length - reconstructedList.size();
+                for (int i = tokensToAdd; i > 0; i--) {
+                    addTokenFromModelOutput(modelOutput.length-1-i);
+                }
+            }
+            /* TODO: Fix!
+            else if (modelOutput.length < reconstructedList.size()) {
+                int tokensToDelete = reconstructedList.size() - modelOutput.length;
+                for (int i = 0; i  < tokensToDelete; i++) {
+                    removeTokenFromModelOutput(reconstructedList.size()-1-i);
+                }
+            }*/
+        //}
+
+
+
+/*
+        if (actualTokenIndex != -1 && actualTokenIndex < modelOutput.length-1) {
+            int lookAheadId = modelOutput[actualTokenIndex+1];
+            // insert
+            //System.out.println("rec: [ " + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex+1).getType() + "] | model: [ " + modelOutput[actualTokenIndex] + ", " + modelOutput[actualTokenIndex+1] + "]" );
+            // do nothing if model offers no solution
+            if (reconstructedList.get(actualTokenIndex).getType() == modelOutput[actualTokenIndex]  &&
+                    reconstructedList.get(actualTokenIndex+1).getType() == lookAheadId) {
+                //System.out.println("Do Nothing!");
+                return;
+            }
+            if (reconstructedList.get(actualTokenIndex).getType() == lookAheadId// ||
+                    //(reconstructedList.get(actualTokenIndex).getType() != modelOutput[actualTokenIndex] && reconstructedList.get(actualTokenIndex+1).getType() != lookAheadId)
+            ) {
+                //System.out.println("Insert!");
+                addTokenFromModelOutput(actualTokenIndex);
+            }
+            // replace
+            else if (reconstructedList.get(actualTokenIndex+1).getType() == lookAheadId) {
+                //ystem.out.println("Replace!!");
+                replaceTokenFromModelOutput(actualTokenIndex);
+            }
+            // delete
+            else {
+                //System.out.println("delete!");
+                removeTokenFromModelOutput(actualTokenIndex);
+            }
+            //replaceTokenFromModelOutput(actualTokenIndex);
+        }
+        else {
+            // if model has more tokens, we add them
+            if (modelOutput.length > reconstructedList.size()) {
+                int tokensToAdd = modelOutput.length - reconstructedList.size();
+                for (int i = tokensToAdd; i > 0; i--) {
+                    addTokenFromModelOutput(modelOutput.length-1-i);
+                }
+            }
+            else if (modelOutput.length < reconstructedList.size()) {
+                int tokensToDelete = reconstructedList.size() - modelOutput.length;
+                for (int i = tokensToDelete; i > 0; i--) {
+                    removeTokenFromModelOutput(reconstructedList.size()-1-i);
+                }
+            }
+        }
+*/
+       // int responseDifference = modelOutput.length - reconstructedList.size();
+        //if (responseDifference > 0) {
+       //     for (int i = reconstructedList.size(); i < modelOutput.length; i++) {
+       //         addTokenFromModelOutput(i);
+       //     }
+       // }
+        // ignore EOF errors, hoping that they were corrected by earlier fixes
+
+    }
+
+    private void removeTokenFromModelOutput(int actualTokenIndex) {
+        //reconstructedList.remove(actualTokenIndex);
+        this.deletions.put(actualTokenIndex, null);
+    }
+
+    private void replaceTokenFromModelOutput(int actualTokenIndex) {
+        CommonToken newToken = new CommonToken(modelOutput[actualTokenIndex]);
+        newToken.setTokenIndex(actualTokenIndex);
+        this.replacements.put(actualTokenIndex, newToken); //reconstructedList.set(actualTokenIndex, newToken);
+        //this.modelOutput = replaceElement(modelOutput, actualTokenIndex, newToken.getType());
+    }
+
+    private void addTokenFromModelOutput(int actualTokenIndex) {
+        // TODO: index is wrong, should be initial token list size?
+        addedTokens += 1;
+        CommonToken newToken = new CommonToken(modelOutput[actualTokenIndex]);
+        newToken.setTokenIndex(tokenList.size()); // +addedTokens
+        //this.replacements.put(actualTokenIndex, newToken); //reconstructedList.add(newToken);
+        //modelOutput = addElement(modelOutput, newToken.getTokenIndex(), newToken.getType());
+        this.additions.put(actualTokenIndex, newToken);
     }
 
     public int getErrorTokenPositionOfTokenStream(Token currentToken) {
-        return reconstructedList.indexOf(currentToken);
+        //Optional<Token> matchedToken =  reconstructedList.stream().filter(t -> t.getTokenIndex() == currentToken.getTokenIndex()+netModifications).findFirst();
+        //return matchedToken.isPresent() ? reconstructedList.indexOf((Token) currentToken) : -1;
+        //reconstructedList.indexOf(currentToken);
+        return IntStream.range(0, reconstructedList.size())
+                .filter(i -> reconstructedList.get(i).getTokenIndex() == (currentToken.getTokenIndex()))
+                .findFirst() // Find the first matching index
+                .orElse(-1);
     }
 
     public int getTotalNumberOfTokens() {
@@ -47,100 +205,108 @@ public class JavaDeepErrorListener extends BaseErrorListener {
     }
 
     public List<CompilationError> getCompilationErrorList() {
-        return this.compilationErrorList;
+        return new ArrayList<>(this.compilationErrorList.stream().collect(Collectors.toMap(
+                        CompilationError::getPosition, // Key mapper
+                        Function.identity(), // Value mapper (identity function)
+                        (existing, replacement) -> existing, // Merge function to keep existing objects
+                        HashMap::new // Use LinkedHashMap to preserve the order
+                ))
+                .values());
     }
 
-    public void replaceTokenFromMessage(String message, int tokenIndex) {
-        String tokenText;
-        if (message == null) {
-            return;
-        }
-        if (message.contains("expecting")) {
-            tokenText = replaceExpectedToken(message);
-            replaceTokenTypeInStream(tokenText, tokenIndex);
-        }
-        else if (message.contains("missing")){
-            tokenText = replaceMissingToken(message);
-            insertTokenTypeInStream(tokenText, tokenIndex);
-        }
-
-
-    }
-
-    public String replaceExpectedToken(String input) {
-        // Find the index of "expecting"
-        int index = input.indexOf("expecting");
-        if (index != -1) {
-            // Extract the substring after "expecting"
-            String subString = input.substring(index + "expecting".length()).trim();
-            // Remove surrounding curly braces
-            subString = subString.substring(1, subString.length() - 1).trim();
-            // Split the substring by commas and get the first element
-            String[] elements = subString.split(",");
-            String firstElement = elements[0].trim();
-            // Remove single quotes around the element
-            return firstElement.replaceAll("^'|'$", "");
-        } else {
-            return null;
-        }
-    }
-    public String replaceMissingToken(String message) {
-        String extractedTokenText = "";
-        // Find the positions of the single quotes
-        int startIndex = message.indexOf("'");
-        int endIndex = message.indexOf("'", startIndex + 1);
-
-        // Extract the substring between the single quotes
-        if (startIndex != -1 && endIndex != -1) {
-            extractedTokenText = message.substring(startIndex + 1, endIndex);
-        }
-        return extractedTokenText;
-
-    }
-
-    private void replaceTokenTypeInStream(String tokenName, int tokenIndex) {
-        int replacementTokenId;
-        if (tokenName.isEmpty()) {
-            replacementTokenId = -1;
-        }
-        else {
-            try {
-                // get tokenId of given token name
-                replacementTokenId = ANTLRDataConverter.mapTokenToIds(tokenName.toUpperCase())[0];
-            } catch (Exception e) {
-                replacementTokenId = ANTLRPlaceholderToken.reversePlaceholders.get(tokenName);
-            }
-        }
-        if (tokenIndex == -1) {
-            reconstructedList.add(new CommonToken(replacementTokenId, tokenName));
-            netModifications += 1;
-        }
-        else {
-            // replace in tokenstream
-            reconstructedList.set(tokenIndex, new CommonToken(replacementTokenId, tokenName));
-        }
-    }
-
-    private void insertTokenTypeInStream(String tokenName, int tokenIndex) {
-        int replacementTokenId;
-        if (tokenName.isEmpty()) {
-            replacementTokenId = -1;
-        }
-        else {
-            try {
-                // get tokenId of given token name
-                replacementTokenId = ANTLRDataConverter.mapTokenToIds(tokenName.toUpperCase())[0];
-            } catch (Exception e) {
-                replacementTokenId = ANTLRPlaceholderToken.reversePlaceholders.get(tokenName);
-            }
-
-        }
-        // add in tokenstream
-        reconstructedList.add(tokenIndex + netModifications, new CommonToken(replacementTokenId, tokenName));
-        netModifications += 1;
-    }
 
     public int[] getReconstructedSequence() {
+
+        applyOperations();
+        return reconstructedList.stream()
+                .map(Token::getType)
+                .mapToInt(Integer::intValue)
+                .toArray();
+    }
+
+    // Apply all operations to the list
+    public void applyOperations() {
+        // Apply deletions first to avoid index shifting
+        for (Integer index : deletions.keySet()) {
+            reconstructedList.remove((int) index);
+        }
+
+        // Apply insertions
+        for (Map.Entry<Integer, Token> entry : additions.entrySet()) {
+            int index = entry.getKey();
+            Token element = entry.getValue();
+            reconstructedList.add(index, element);
+        }
+
+        // Apply modifications
+        for (Map.Entry<Integer, Token> entry : replacements.entrySet()) {
+            int index = entry.getKey();
+            Token newElement = entry.getValue();
+            reconstructedList.set(index, newElement);
+        }
+
+        // Clear the operations
+        additions.clear();
+        deletions.clear();
+        replacements.clear();
+    }
+
+    private static int[] deleteElement(int[] array, int index) {
+        // Check if the index is within bounds
+        if (index < 0 || index >= array.length) {
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
+        }
+
+        // Create a new array with size one less than the original array
+        int[] newArray = new int[array.length - 1];
+
+        // Copy elements from the original array to the new array, skipping the element at the specified index
+        for (int i = 0, j = 0; i < array.length; i++) {
+            if (i != index) {
+                newArray[j++] = array[i];
+            }
+        }
+
+        return newArray;
+    }
+
+    private static int[] replaceElement(int[] array, int index, int newValue) {
+        // Check if the index is within bounds
+        if (index < 0 || index >= array.length) {
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
+        }
+
+        // Replace the element at the specified index
+        array[index] = newValue;
+        return array;
+    }
+
+    private static int[] addElement(int[] array, int index, int newValue) {
+        // Check if the index is within bounds
+        if (index < 0 || index > array.length) {
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
+        }
+
+        // Create a new array with size one greater than the original array
+        int[] newArray = new int[array.length + 1];
+
+        // Copy elements from the original array to the new array, adding the new element at the specified index
+        for (int i = 0, j = 0; i < newArray.length; i++) {
+            if (i == index) {
+                newArray[i] = newValue;
+            } else {
+                newArray[i] = array[j++];
+            }
+        }
+
+        return newArray;
+    }
+
+    public int[] applyReplacements() {
+        for (Map.Entry<Integer, Token> entry : replacements.entrySet()) {
+            reconstructedList.set(entry.getKey(), entry.getValue());
+            // Do something with key and value
+        }
         return reconstructedList.stream()
                 .map(Token::getType)
                 .mapToInt(Integer::intValue)

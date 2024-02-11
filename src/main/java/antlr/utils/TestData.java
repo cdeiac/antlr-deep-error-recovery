@@ -1,4 +1,4 @@
-package antlr.converters;
+package antlr.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

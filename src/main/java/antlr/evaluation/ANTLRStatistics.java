@@ -2,7 +2,7 @@ package antlr.evaluation;
 
 import java.util.List;
 
-public class BaseStatistics {
+public class ANTLRStatistics {
 
     private double baseParsePercentage;
     private double baseReconstruction;
@@ -13,12 +13,12 @@ public class BaseStatistics {
     private List<CompilationError> compilationErrors;
 
 
-    public BaseStatistics(double baseParsePercentage,
-                          double baseReconstruction,
-                          List<CompilationError> baseCompilationErrors,
-                          double parsePercentage,
-                          double reconstruction,
-                          List<CompilationError> compilationErrors) {
+    public ANTLRStatistics(double baseParsePercentage,
+                           double baseReconstruction,
+                           List<CompilationError> baseCompilationErrors,
+                           double parsePercentage,
+                           double reconstruction,
+                           List<CompilationError> compilationErrors) {
 
         this.baseParsePercentage = baseParsePercentage;
         this.baseReconstruction = baseReconstruction;
@@ -27,7 +27,6 @@ public class BaseStatistics {
         this.reconstruction = reconstruction;
         this.compilationErrors = compilationErrors;
     }
-
 
 
     public double getBaseParsePercentage() {

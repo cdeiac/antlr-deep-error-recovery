@@ -18,8 +18,8 @@ public class TokenStreamListener extends JavaParserBaseListener {
     @Override
     public void enterIdentifier(JavaParser.IdentifierContext ctx) {
 
-
-        rewriter.replace(ctx.start, ctx.stop, "test");//new EvaluateExpressionVisitor().visit(ctx));
+        // do replacement here after rewriter.replace
+        rewriter.replace(ctx.start, ctx.start, "CLASS");//new EvaluateExpressionVisitor().visit(ctx));
     }
 
     public String getReplacedCode() {

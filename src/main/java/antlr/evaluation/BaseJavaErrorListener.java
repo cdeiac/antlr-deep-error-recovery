@@ -6,17 +6,20 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class JavaBaseErrorListener extends BaseErrorListener {
+public class BaseJavaErrorListener extends BaseErrorListener {
 
     private final List<Token> tokenList;
     private List<Token> reconstructedList = new ArrayList<>();
     private List<CompilationError> compilationErrorList = new ArrayList<>();
 
 
-    public JavaBaseErrorListener(List<Token> tokenStream) {
+    public BaseJavaErrorListener(List<Token> tokenStream) {
         this.tokenList = tokenStream.stream()
                 // filter out WS && EOF
                 .filter(t -> t.getType() != 125 && t.getType() != -1)
@@ -38,10 +41,15 @@ public class JavaBaseErrorListener extends BaseErrorListener {
     }
 
     public int getErrorTokenPositionOfTokenStream(Token currentToken) {
-        return IntStream.range(0, reconstructedList.size())
+        int match = IntStream.range(0, reconstructedList.size())
                 .filter(i -> reconstructedList.get(i).getTokenIndex() == (currentToken.getTokenIndex()))
                 .findFirst() // Find the first matching index
                 .orElse(-1);
+        if (match == -1) {
+            // EOF matched
+            return getErrorTokenPositionOfTokenStream(reconstructedList.get(reconstructedList.size()-1));
+        }
+        return match;
     }
 
     public int getTotalNumberOfTokens() {
@@ -49,14 +57,27 @@ public class JavaBaseErrorListener extends BaseErrorListener {
     }
 
     public List<CompilationError> getCompilationErrorList() {
-        return this.compilationErrorList;
+        return new ArrayList<>(this.compilationErrorList.stream().collect(Collectors.toMap(
+                        CompilationError::getPosition, // Key mapper
+                        Function.identity(), // Value mapper (identity function)
+                        (existing, replacement) -> existing, // Merge function to keep existing objects
+                        HashMap::new // Use LinkedHashMap to preserve the order
+                ))
+                .values());
     }
-
     public int[] getReconstructedSequence() {
         return reconstructedList.stream()
                 .map(Token::getType)
                 .mapToInt(Integer::intValue)
                 .toArray();
+    }
+
+    public int findPreviousIndex(int positionIndex) {
+        int match = IntStream.range(0, reconstructedList.size())
+                .filter(i -> reconstructedList.get(i).getTokenIndex() > positionIndex)
+                .findFirst() // Find the first matching index
+                .orElse(-1);
+        return match-1;
     }
 
 }
