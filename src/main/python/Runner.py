@@ -103,8 +103,14 @@ class Runner:
     def __init_logger(self):
         if not os.path.exists(self.config.log_dir):
             os.mkdir(self.config.log_dir)
+        else:
+            try:
+                os.remove(self.config.log_dir+'/scores.json')
+            except OSError:
+                pass
         if not os.path.exists(self.config.checkpoint_dir):
             os.mkdir(self.config.checkpoint_dir)
+
 
         logger = logging.getLogger(__name__)
         logfile_name = f'{self.config.log_dir}/{self.config.model_name}.log'
