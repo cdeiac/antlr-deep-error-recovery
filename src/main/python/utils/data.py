@@ -48,7 +48,7 @@ def load_cache_of_type(config: Config, fold_id: int, datatype: str):
             try:
                 d = pickle.load(f)
                 original.append(d['original'])
-                noisy.append(d['original'])
+                noisy.append(d['noisy'])
             except EOFError:
                 break
     return original, noisy
