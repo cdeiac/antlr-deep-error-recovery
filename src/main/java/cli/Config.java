@@ -14,7 +14,7 @@ public class Config {
     public Config(String dataPath, double noiseProbability) {
         this.dataPath = dataPath;
         this.noiseProbability = noiseProbability;
-        this.generatedDirectoryName = new DecimalFormat("00.0")
+        this.generatedDirectoryName = new DecimalFormat("00.000")
                 .format(noiseProbability)
                 .replace(".", "_");
     }
