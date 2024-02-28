@@ -39,7 +39,7 @@ public class NoiseGenerator {
             if (noiseStrategy instanceof Deletion) {
                 noiseOperation = 1;
             }
-            if (noiseStrategy instanceof Insertion) {
+            else if (noiseStrategy instanceof Insertion) {
                 noiseOperation = 2;
             }
             else if (noiseStrategy instanceof Modification) {
