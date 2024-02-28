@@ -31,10 +31,9 @@ public class NoiseGenerator {
     public NoiseOperation processWithProbability(String token, double probability) {
         logger.debug("Process Token with probability {}", probability);
         double randomNumber = this.randomNoise.nextDouble();
-        double smoothProbability = (int) (probability * FLOATING_POINT_CORRECTION);
         String[] generatedToken = new String[]{token};
         int noiseOperation = 0;
-        if (randomNumber < smoothProbability) {
+        if (randomNumber < probability) {
             NoiseStrategy noiseStrategy = this.selectRandomNoiseStrategy();
 
             if (noiseStrategy instanceof Deletion) {
