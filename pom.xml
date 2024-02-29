@@ -57,6 +57,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources/data</directory>
+                <includes>
+                    <include>jhetas_clean.json</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.antlr</groupId>
