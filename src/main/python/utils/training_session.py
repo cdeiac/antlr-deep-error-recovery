@@ -16,12 +16,12 @@ class TrainingSession:
         self.num_layers = 1
         self.bidirectional = True
         self.config = config
-        self.start_fold,  self.loss_function, self.model, self.optimiser, self.scheduler = self.__init_session()
+        self.start_fold,  self.loss_function, self.model, self.optimiser, self.scheduler = self.init_session()
 
     def save_checkpoint(self, current_fold: int):
         torch.save(self.model.state_dict(), f"{self.config.checkpoint_dir}/checkpoint{current_fold}.pt")
 
-    def __init_session(self):
+    def init_session(self):
         model = self.__init_model()
         start_fold = 0
         if self.config.load_checkpoint:
@@ -38,14 +38,18 @@ class TrainingSession:
         return model
 
     def __init_optimiser(self, model):
-        return optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
+        return optim.Adam(model.parameters(), lr=0.001)#, weight_decay=1e-4)
 
     def __init_scheduler(self, optimiser):
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimiser,
             mode='max',
             factor=0.1,
+<<<<<<< HEAD
             patience=3,
+=======
+            patience=2,
+>>>>>>> error-recovery-feedback-loop
             threshold=0.001,
             threshold_mode='abs'
         )

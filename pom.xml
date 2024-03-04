@@ -14,9 +14,14 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <commons-math3.version>3.6.1</commons-math3.version>
         <jackson.version>2.15.3</jackson.version>
         <!-- ANTLR -->
         <antlr.version>4.13.1</antlr.version>
+        <!-- Deep Java Library -->
+        <djl.version>0.26.0</djl.version>
+        <pytorch-native-cpu.version>2.1.1</pytorch-native-cpu.version>
+        <pytorch-jni.version>2.1.1-0.26.0</pytorch-jni.version>
         <!-- Testing -->
         <junit.jupiter.version>5.9.2</junit.jupiter.version>
         <junit.platform.version>1.9.1</junit.platform.version>
@@ -24,6 +29,18 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.12.1</version>
+        </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
@@ -33,6 +50,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons-math3.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -65,9 +88,32 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.12.1</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/ai.djl/api -->
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+            <version>${djl.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-native-cpu</artifactId>
+            <classifier>osx-x86_64</classifier>
+            <version>${pytorch-native-cpu.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-jni</artifactId>
+            <version>${pytorch-jni.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
-
     <build>
         <resources>
             <resource>
@@ -115,5 +161,5 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
+
