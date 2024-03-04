@@ -28,10 +28,10 @@ public class DeepErrorRecoveryHandler {
     public DeepErrorRecoveryHandler(List<Token> tokenStream,
                                     int[] antlrEncodedModelOutput,
                                     boolean bailOnError) {
-        this.tokenList = tokenStream.stream()
+        this.tokenList = tokenStream;//.stream()
                 // filter out WS && EOF
-                .filter(t -> t.getType() != 125 && t.getType() != -1)
-                .toList();
+                //.filter(t -> t.getType() != 125 && t.getType() != -1)
+                //.toList();
         this.reconstructedList = new ArrayList<>(tokenList);
         this.modelOutput = antlrEncodedModelOutput;
         this.bailOnError = bailOnError;
@@ -68,6 +68,39 @@ public class DeepErrorRecoveryHandler {
         }
         return applyOperations();
     }
+
+    public int[] reconcileCompilationErrors(List<CompilationError> compilationErrors) {
+
+        for (CompilationError compilationError : compilationErrors) {
+            if (bailOnError && bailed) {
+                break;
+            }
+            Token errorToken = tokenList.get(compilationError.getPosition());
+            reconcile(errorToken);
+            bailed = true;
+        /*    List<Token> adaptedTokenStream = IntStream.range(0, tokenList.size())
+                    .mapToObj(index -> {
+                        Token token = tokenList.get(index);
+                        if (token.equals(errorNode.getSymbol())) {
+                            try {
+                                CommonToken newToken = new CommonToken(token);
+                                newToken.setType(modelOutput[index]);
+                                //System.out.println("Replaced: "+ token.getType() + " with: " + newToken.getType() + " at Index: " + index);
+                                return newToken;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // ignore, model has no answer for it (e.g., its output is shorter)
+                            }
+                        }
+                        return token;
+                    }).toList();
+            this.tokenList = adaptedTokenStream;
+            */
+
+        }
+        return applyOperations();
+    }
+
     public int[] reconcileErrorNodes(List<ErrorNode> errorNodes) {
 
         for (ErrorNode errorNode : errorNodes) {
@@ -120,9 +153,12 @@ public class DeepErrorRecoveryHandler {
             int seqLA = actualTokenIndex < reconstructedList.size()-1 ?  reconstructedList.get(actualTokenIndex + 1).getType() : -1;
             // insert
             //System.out.println("rec: [ " + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex + 1).getType() + "] | model: [ " + modelOutput[actualTokenIndex] + ", " + modelOutput[actualTokenIndex + 1] + "]");
-            if (modelCurrent == seqCurrent) {
+            if (modelCurrent == seqCurrent && modelLA == seqLA) {
                 // do nothing
-            } else if (seqCurrent == modelLA) {
+            } //else if (modelLA == seqLA) {
+                // TODO: Set index to next position?
+            //}
+            else if (seqCurrent == modelLA) {
                 //System.out.println("INSERT");
                 addTokenFromModelOutput(actualTokenIndex);
                 //indexCorrection+=1;

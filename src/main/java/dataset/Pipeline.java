@@ -79,7 +79,6 @@ public class Pipeline {
     }
 
     private Lexer newLexerInstanceForLanguage(String source) {
-        // TODO: Support remaining languages! (from file name)
         return new JavaLexer(CharStreams.fromString(source));
     }
 }

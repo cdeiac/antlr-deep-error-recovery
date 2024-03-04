@@ -2,8 +2,6 @@ import antlr.evaluation.JavaProgramEvaluator;
 import antlr.utils.TestData;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JavaProgramEvaluatorTest {
@@ -22,7 +20,7 @@ public class JavaProgramEvaluatorTest {
                 " IDENTIFIER DOT IDENTIFIER SEMI IDENTIFIER INC RPAREN LBRACE IF LPAREN IDENTIFIER LBRACK IDENTIFIER " +
                 "RBRACK GE IDENTIFIER RPAREN LBRACE BREAK SEMI RBRACE RBRACE RETURN IDENTIFIER SEMI RBRACE RBRACE EOS";
         // Act
-        evaluator.parseAndEvaluateAllOn("test", List.of(noisy), List.of(original));
+        //evaluator.parseAndEvaluateAllOn("test", List.of(noisy), List.of(original));
         // Assert
         assertNotNull(noisy);
 

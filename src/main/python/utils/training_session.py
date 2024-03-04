@@ -38,14 +38,14 @@ class TrainingSession:
         return model
 
     def __init_optimiser(self, model):
-        return optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
+        return optim.Adam(model.parameters(), lr=0.001)#, weight_decay=1e-4)
 
     def __init_scheduler(self, optimiser):
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimiser,
             mode='max',
             factor=0.1,
-            patience=3,
+            patience=2,
             threshold=0.001,
             threshold_mode='abs'
         )

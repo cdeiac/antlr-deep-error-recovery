@@ -4,10 +4,12 @@ public class CompilationError {
 
     private final String type;
     private final int position;
+    private final int adjustedPosition;
 
 
-    public CompilationError(String message, int position) {
+    public CompilationError(String message, int position, int adjustedPosition) {
         this.type = this.formatType(message);
+        this.adjustedPosition = adjustedPosition;
         this.position = position;
     }
 
@@ -30,4 +32,10 @@ public class CompilationError {
     public int getPosition() {
         return position;
     }
+
+    public int getAdjustedPosition() {
+        return adjustedPosition;
+    }
+
+
 }

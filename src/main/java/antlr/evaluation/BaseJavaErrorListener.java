@@ -37,7 +37,7 @@ public class BaseJavaErrorListener extends BaseErrorListener {
                             RecognitionException e) {
 
         int actualTokenIndex = getErrorTokenPositionOfTokenStream((Token) offendingSymbol);
-        this.compilationErrorList.add(new CompilationError(msg, actualTokenIndex));
+        this.compilationErrorList.add(new CompilationError(msg, actualTokenIndex, -1));
     }
 
     public int getErrorTokenPositionOfTokenStream(Token currentToken) {

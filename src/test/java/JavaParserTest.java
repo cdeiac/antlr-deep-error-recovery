@@ -1,9 +1,9 @@
 import antlr.JavaLexer;
 import antlr.JavaParser;
 import antlr.evaluation.ErrorReporterVisitor;
-import antlr.evaluation.JavaErrorListener;
 import antlr.extensions.CustomErrorStrategy;
 import antlr.extensions.CustomVisitor;
+import antlr.extensions.DeepErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
@@ -53,23 +53,51 @@ public class JavaParserTest {
 
     @Test
     public void errorReporterVisitorTest() {
-        String javaClassContent = "public class Test  public void doSomething( i) {} }";
+        String javaClassContent = "class MWKTFEJL { public KUmHmWuD exPyFemQ ( WohSuKpT YrKTWgvP ) { RjadaihB EWGXbMvg = new Kfgirgpo ( ) ; int GtfnSgSY = 12345 ; vceUJziv < cudaHAzY > LUPUIUyu = new aiFnGUWO ( ) ; MOZVKslu < tBkXLlIF > MjbnRzEb = new XUczHksJ ( ) ; for ( int nvwGiIya = 12345 ; dVIJCBlA < yDcPSXNn . lfEgCxRW ( ) ; qcSLsSfK ++ ) { char SbiDlisX = iInxqamR . stsNHZbW ( qOUEhwzh ) ; if ( \"abc\" == HOCDMJhL ) { lBJQqRdm . xsAFrIHH ( VhnQLZiV ) ; jvIZzGDN . iCnItHqM ( DXmVFCLe . BmDCMGAV ( ) ) ; hNyZFVhH = 12345 ; oebcnwGm = new pDIMnNrl ( ) ; } else if ( \"abc\" == lHNmraYy ) { IQBtfEvk tQEFzUhv = new ksUxarcT ( ) ; int QDjVdEXk = OdkjZlEB . LCZgOyyg ( ) ; for ( int otEDNcbl = 12345 ; lWXHvPOg < nLNfLzZZ ; OaUpjhrV ++ ) { bnrwrGDE . xhMzCUBZ ( mEhUwNlc ) ; } SEixDnqf = new aDJVXvEj ( MRhpoZtU . rsDjRCXg ( ) + FQcclUeo ) ; } else if ( xwNKzhKR >= \"abc\" && WeAgGTdo <=> > \"abc\" ) { IWfHAFHs = BwmyZKnF * 12345 + ( SVCnQtrB - \"abc\" ) ; } else { EbQXzbwO . egwqbXrz ( QDuzcSrX ) ; } } return HShXoFtS . CBMVdFeT ( ) ; } }\n";
         JavaLexer javaLexer = new JavaLexer(CharStreams.fromString(javaClassContent));
         CommonTokenStream tokens = new CommonTokenStream(javaLexer);
         tokens.fill();
         JavaParser javaParser = new JavaParser(tokens);
-        javaParser.removeErrorListeners();
-        JavaErrorListener errorListener = new JavaErrorListener(tokens.getTokens());
-        javaParser.addErrorListener(errorListener);
+        //javaParser.removeErrorListeners();
+        //BaseJavaErrorListener errorListener = new BaseJavaErrorListener(tokens.getTokens());
+        //javaParser.addErrorListener(errorListener);
+        DefaultErrorStrategy errorStrategy = new DefaultErrorStrategy();
+        javaParser.setErrorHandler(errorStrategy);
         javaParser.setTrace(true);
         ErrorReporterVisitor visitor = new ErrorReporterVisitor();
         var result = visitor.visit(javaParser.compilationUnit());
-        System.out.println(result);
+        System.out.println(visitor.getErrorNodes());
+    }
+
+    @Test
+    public void realTest() {
+        String javaClassContent = "class ALXWJKHZ { public JLKZfmXq nwGJQDab ( YbMgXtyA QNpdkVPJ ) { ZbBIdBFu uowOOpjm = new PnChdBro ( ) ; int DIwJScKf = 12345 ; ZWsRJTGp < LPzNRird > QHNscHuG = new hDwoApei ( ) ; FFKZPUnO < kMEzQdUr > hxtAnWhT = new JdBmGezS ( ) ; for ( int tjqoLqjl = 12345 ; eKizkMLd < rJSDgWVa . ufyowAeh ( ) ; fQoGzjAE ++ ) { char rDvlyUCo = vBoISVwy . nomyEtdb ( TNxJztIK ) ; if ( \"A\" == MNuaHWbo ) { nklaAywQ . ozeFBfxL ( hLppkKdM ) ; TfqJOEEk . vlUrLvuA ( iiBiPibN . rAlcaPPm ( ) ) ; tzqAgTLP = 12345 ; SCsAjjNU = new hnvzSsFx ( ) ; } else if ( \"A\" == nRNAnRin ) { DUDDQVfr POfhRNNg = new PklvMWUh ( ) ; int KYfXidbg = eMUsGGcO . jwsTMxGH ( ) ; for ( int NrdRgWlj = 12345 ; ulcsVfIy < uaOARQEH ; mRsmKEPX ++ ) { EOtMmwPR . tvHlCehn ( bBahYksK ) ; } iaCBGGvm = new GUXchdMx ( jidPBoPW . NLMqkygy ( ) + LcdpoLdz ) ; } else if ( bFghqunq >= \"A\" && jtiPmxnC <=> \"A\" ) { ZBFRatGL = YCHIenoi * 12345 + ( QvdWKXPx - \"A\" ) ; } else { SudWqnej . OVQPMwxU ( IoLkDmOs ) ; } } return APibbGhQ . jlkJAHGk ( ) ; } }";
+        JavaLexer javaLexer = new JavaLexer(CharStreams.fromString(javaClassContent));
+        CommonTokenStream tokens = new CommonTokenStream(javaLexer);
+        tokens.fill();
+        String modelContent = "class RJQLCXGZ { public iuTSKtSA bmaWzXki ( ualSNBkI DIaLjfVp ) { RFyaoMqT QrOBFHyD = new RxxsTUqF ( ) ; int weeCykYZ = 12345 ; AutUWKRB < YEuDdmAc > InYKclDq = new vNFFIjKx ( ) ; ACeUADEB < IXzScuPL > NgQslhHe = new TeKAyHOE ( ) ; for ( int BNNDYnZq = 12345 ; lkBMMjAo < iwqdohnj . PcbIMsiG ( ) ; OkVuppqV ++ ) { char JPlVTrMc = bQABgFWv . mkXvyMTD ( yffFgIdW ) ; if ( \"A\" == ItIrNsMc ) { VyKKwWfO . TideLOAO ( bQPhemJj ) ; niUBcPLn . nLuWfNNx ( iUUYzDvo . OPBaFycZ ( ) ) ; jcNGTirq = 12345 ; VOloVSjX = new WoYvzYyH ( ) ; } else if ( \"A\" == rQgAbbET ) { vxsBazoN PBKLdkEE = new pzhhWnKj ( ) ; int egKfmdnk = SWMpkJuQ . hDcjsihb ( ) ; for ( int SGenDgaE = 12345 ; ozwTeBxQ < RpmTXnXx ; TRLcivgT ++ ) { yDSVAqnL . CbsCpCzW ( MqnHKooi ) ; } mklYTMFr = new zbAHFGwP ( CIwkbYwJ . rCqFLQja ( ) + NIchicAE ) ; } else if ( xUrzzToR >= \"A\" && JZYZdgre <=> \"A\" ) { rWgtzfxi = bOcxxuuo * 12345 + ( UPlcEGEE - \"A\" ) ; } else { bBqHzUNg . MXunyCJE ( vWMZldRi ) ; } } return glRDmxuQ . DUrzDYiO ( ) ; } }";
+        JavaLexer modelLexer = new JavaLexer(CharStreams.fromString(modelContent));
+        CommonTokenStream modelTokens = new CommonTokenStream(modelLexer);
+        modelTokens.fill();
+        JavaParser javaParser = new JavaParser(tokens);
+        javaParser.removeErrorListeners();
+        //JavaErrorListener errorListener = new JavaErrorListener(tokens.getTokens(), false);
+        //javaParser.addErrorListener(errorListener);
+
+        //CustomErrorListener errorListener = new CustomErrorListener(tokens);
+        //javaParser.addErrorListener(errorListener);
+        DeepErrorStrategy errorStrategy = new DeepErrorStrategy(tokens.getTokens(), modelTokens.getTokens(), null);
+        javaParser.setErrorHandler(errorStrategy);
+        javaParser.setTrace(true);
+        ErrorReporterVisitor visitor = new ErrorReporterVisitor();
+        //var result = visitor.visit(javaParser.compilationUnit());
+        javaParser.compilationUnit();
+        System.out.println(errorStrategy.getRecoveredTokens());
     }
 
     @Test
     public void compilationUnitWithTokenStreamRewriter() {
-        String javaClassContent = "public class Test { public void doSomething(int i int v, int e, int r, int x) {} }";
+        String javaClassContent = "public class Test { public static void main(String[] args) { System.out.println(\"Hello, World!\");} }";
         JavaLexer javaLexer = new JavaLexer(CharStreams.fromString(javaClassContent));
         CommonTokenStream tokens = new CommonTokenStream(javaLexer);
         CustomErrorStrategy errorStrategy = new CustomErrorStrategy();

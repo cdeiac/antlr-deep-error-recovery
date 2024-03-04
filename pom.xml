@@ -14,6 +14,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <commons-math3.version>3.6.1</commons-math3.version>
         <jackson.version>2.15.3</jackson.version>
         <!-- ANTLR -->
         <antlr.version>4.13.1</antlr.version>
@@ -28,6 +29,18 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.12.1</version>
+        </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
@@ -37,6 +50,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons-math3.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -82,11 +101,16 @@
             <version>${pytorch-jni.version}</version>
             <scope>runtime</scope>
         </dependency>
-
-
     </dependencies>
-
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources/data</directory>
+                <includes>
+                    <include>jhetas_clean.json</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.antlr</groupId>
@@ -125,5 +149,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

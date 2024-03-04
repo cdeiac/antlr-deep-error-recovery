@@ -1,7 +1,5 @@
 package antlr.converters;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +83,7 @@ public class ANTLRPlaceholderToken {
         put(73, "true");
         put(74, "\"A\"");
         put(75, "\"abc\"");
-        put(76, "\"\"\" This is a multiline text block.\"\"\"\n");
+        put(76, "\"\"\" multiline text block \"\"\"\n");
         put(77, "null");
         put(78, "(");
         put(79, ")");
@@ -104,7 +102,7 @@ public class ANTLRPlaceholderToken {
         put(92, "?");
         put(93, ":");
         put(94, "==");
-        put(95, "<=>");
+        put(95, "<=");
         put(96, ">=");
         put(97, "!=");
         put(98, "&&");
@@ -131,7 +129,7 @@ public class ANTLRPlaceholderToken {
         put(119, ">>=");
         put(120, ">>>=");
         put(121, "->");
-        put(122, ";;");
+        put(122, "::");
         put(123, "@");
         put(124, "...");
         put(125, " ");
@@ -275,12 +273,16 @@ public class ANTLRPlaceholderToken {
         List<String> dummySource = new ArrayList<>();
         for (int i = 0; i < encodedSourceCode.length; i++) {
             String token = placeholders.get(encodedSourceCode[i]);
+            if (token == null) {
+                // EOF
+                continue;
+            }
             if (encodedSourceCode[i] == 128) { // identifier
                 token = generateRandomString(8);
             }
             // capitalize identifier if class token precedes it
             if (i > 0 && encodedSourceCode[i-1] == 9) { // class
-                dummySource.add(StringUtils.capitalize(token));
+                dummySource.add(token.toUpperCase());
             }
             else {
                 dummySource.add(token);
