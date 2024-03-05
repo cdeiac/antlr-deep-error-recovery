@@ -11,5 +11,5 @@ load_cv=$2
 load_checkpoint=$3
 
 # data preparation and training
-source venv/bin/activate
-python src/main/python/main.py --data_dir=$data_dir --load_cv=$load_cv --load_checkpoint=$load_checkpoint
+source src/main/python/venv/bin/activate
+python3 src/main/python/main.py --data_dir=$data_dir --load_cv=$load_cv --load_checkpoint=$load_checkpoint

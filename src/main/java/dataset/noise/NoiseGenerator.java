@@ -13,7 +13,6 @@ public class NoiseGenerator {
     private final List<NoiseStrategy> noiseStrategies;
     private final Random randomStrategy;
     private final Random randomNoise;
-    private static final int FLOATING_POINT_CORRECTION = 10;
 
 
     public NoiseGenerator(Tokenizer tokenizer) {
@@ -31,17 +30,16 @@ public class NoiseGenerator {
      */
     public NoiseOperation processWithProbability(String token, double probability) {
         logger.debug("Process Token with probability {}", probability);
-        int randomNumber = this.randomNoise.nextInt(1, 100 * FLOATING_POINT_CORRECTION);
-        double smoothProbability = (int) (probability * FLOATING_POINT_CORRECTION);
+        double randomNumber = this.randomNoise.nextDouble();
         String[] generatedToken = new String[]{token};
         int noiseOperation = 0;
-        if (randomNumber <= smoothProbability) {
+        if (randomNumber < probability) {
             NoiseStrategy noiseStrategy = this.selectRandomNoiseStrategy();
 
             if (noiseStrategy instanceof Deletion) {
                 noiseOperation = 1;
             }
-            if (noiseStrategy instanceof Insertion) {
+            else if (noiseStrategy instanceof Insertion) {
                 noiseOperation = 2;
             }
             else if (noiseStrategy instanceof Modification) {

@@ -25,6 +25,7 @@ noise_levels=("$@")
 for noise_level in "${noise_levels[@]}"; do
     # generate noisy dataset
     data_dir=$(./generate_data.sh "$data_path" "$noise_level")
+    echo $data_dir
     last_command_was_successful
     # train model on noisy data
     ./train_model.sh "$data_dir" False False

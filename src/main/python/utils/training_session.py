@@ -12,16 +12,16 @@ class TrainingSession:
         self.max_epochs = 10
         self.vocab_size = vocab_size
         self.embedding_dim = 128
-        self.hidden_size = 16
+        self.hidden_size = 128
         self.num_layers = 1
         self.bidirectional = True
         self.config = config
-        self.start_fold,  self.loss_function, self.model, self.optimiser, self.scheduler = self.__init_session()
+        self.start_fold,  self.loss_function, self.model, self.optimiser, self.scheduler = self.init_session()
 
     def save_checkpoint(self, current_fold: int):
         torch.save(self.model.state_dict(), f"{self.config.checkpoint_dir}/checkpoint{current_fold}.pt")
 
-    def __init_session(self):
+    def init_session(self):
         model = self.__init_model()
         start_fold = 0
         if self.config.load_checkpoint:
@@ -45,7 +45,7 @@ class TrainingSession:
             optimiser,
             mode='max',
             factor=0.1,
-            patience=10,
+            patience=3,
             threshold=0.001,
             threshold_mode='abs'
         )

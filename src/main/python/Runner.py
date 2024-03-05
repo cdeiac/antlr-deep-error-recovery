@@ -56,6 +56,8 @@ class Runner:
             self.training_session.save_checkpoint(fold_id)
             logs[fold_id] = format_scores(train_losses, train_accs, val_losses, val_accs, test_accs)
             save_training_logs(self.config, logs)
+            # initialize model
+            self.training_session = TrainingSession(self.config, self.vocab_size)
         self.logger.info("Training fully completed!")
 
     def load_cv_fold(self, fold_id: int):
