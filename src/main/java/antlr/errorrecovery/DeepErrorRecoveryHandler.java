@@ -1,138 +1,66 @@
 package antlr.errorrecovery;
 
 import antlr.evaluation.CompilationError;
+import antlr.evaluation.RecoveryOperation;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ErrorNode;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static antlr.converters.ANTLRDataConverter.ANTLR_INDEX_2_TOKEN;
+
 public class DeepErrorRecoveryHandler {
 
     private List<Token> tokenList;
     private List<Token> reconstructedList;
-    private int[] modelOutput;
+    private List<Token> modelOutput;
+    private int[] original;
     private int indexCorrection = 0;
     private List<CompilationError> compilationErrorList = new ArrayList<>();
+    private List<RecoveryOperation> operations = new ArrayList<>();
     private HashMap<Integer, Token> replacements = new HashMap<>();
     private HashMap<Integer, Token> additions = new HashMap<>();
     private HashMap<Integer, Token> deletions = new HashMap<>();
-    private final boolean bailOnError;
-    private boolean bailed = false;
-
 
 
     public DeepErrorRecoveryHandler(List<Token> tokenStream,
-                                    int[] antlrEncodedModelOutput,
-                                    boolean bailOnError) {
-        this.tokenList = tokenStream;//.stream()
-                // filter out WS && EOF
-                //.filter(t -> t.getType() != 125 && t.getType() != -1)
-                //.toList();
+                                    List<Token> antlrEncodedModelOutput,
+                                    int[] original) {
+        this.tokenList = new ArrayList<>(tokenStream).stream()
+                .filter(t -> t.getType() != 125 && t.getType() != -1)
+                .toList();
         this.reconstructedList = new ArrayList<>(tokenList);
-        this.modelOutput = antlrEncodedModelOutput;
-        this.bailOnError = bailOnError;
+        this.modelOutput = antlrEncodedModelOutput.stream()
+                .filter(t -> t.getType() != 125 && t.getType() != -1)
+                .toList();
+        this.original = original;
     }
 
-
-    public int[] reconcileTokens(List<Token> tokens) {
-
-        for (Token token : tokens) {
-            if (bailOnError && bailed) {
-                break;
-            }
-            reconcile(token);
-            bailed = true;
-        /*    List<Token> adaptedTokenStream = IntStream.range(0, tokenList.size())
-                    .mapToObj(index -> {
-                        Token token = tokenList.get(index);
-                        if (token.equals(errorNode.getSymbol())) {
-                            try {
-                                CommonToken newToken = new CommonToken(token);
-                                newToken.setType(modelOutput[index]);
-                                //System.out.println("Replaced: "+ token.getType() + " with: " + newToken.getType() + " at Index: " + index);
-                                return newToken;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                // ignore, model has no answer for it (e.g., its output is shorter)
-                            }
-                        }
-                        return token;
-                    }).toList();
-            this.tokenList = adaptedTokenStream;
-            */
-
-        }
-        return applyOperations();
-    }
-
-    public int[] reconcileCompilationErrors(List<CompilationError> compilationErrors) {
+    public void reconcileCompilationErrors(List<CompilationError> compilationErrors) {
 
         for (CompilationError compilationError : compilationErrors) {
-            if (bailOnError && bailed) {
-                break;
+            int errorPosition = compilationError.getPosition();
+            CompilationError adjustedError = new CompilationError(compilationError.getType(), compilationError.getPosition(), getAdjustedPosition(errorPosition));
+            this.compilationErrorList.add(adjustedError);
+            if (errorPosition == -1) {
+                if (tokenList.size() < modelOutput.size()) {
+                    addTokenFromModelOutput(tokenList.size());
+                }
+
             }
-            Token errorToken = tokenList.get(compilationError.getPosition());
-            reconcile(errorToken);
-            bailed = true;
-        /*    List<Token> adaptedTokenStream = IntStream.range(0, tokenList.size())
-                    .mapToObj(index -> {
-                        Token token = tokenList.get(index);
-                        if (token.equals(errorNode.getSymbol())) {
-                            try {
-                                CommonToken newToken = new CommonToken(token);
-                                newToken.setType(modelOutput[index]);
-                                //System.out.println("Replaced: "+ token.getType() + " with: " + newToken.getType() + " at Index: " + index);
-                                return newToken;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                // ignore, model has no answer for it (e.g., its output is shorter)
-                            }
-                        }
-                        return token;
-                    }).toList();
-            this.tokenList = adaptedTokenStream;
-            */
+            else if (errorPosition < tokenList.size()) {
+                Token errorToken = tokenList.get(errorPosition);
+                reconcile(errorToken, compilationError);
+            }
 
         }
-        return applyOperations();
+        //return applyOperations();
     }
 
-    public int[] reconcileErrorNodes(List<ErrorNode> errorNodes) {
-
-        for (ErrorNode errorNode : errorNodes) {
-            if (bailOnError && bailed) {
-                break;
-            }
-            reconcile(errorNode.getSymbol());
-            bailed = true;
-        /*    List<Token> adaptedTokenStream = IntStream.range(0, tokenList.size())
-                    .mapToObj(index -> {
-                        Token token = tokenList.get(index);
-                        if (token.equals(errorNode.getSymbol())) {
-                            try {
-                                CommonToken newToken = new CommonToken(token);
-                                newToken.setType(modelOutput[index]);
-                                //System.out.println("Replaced: "+ token.getType() + " with: " + newToken.getType() + " at Index: " + index);
-                                return newToken;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                // ignore, model has no answer for it (e.g., its output is shorter)
-                            }
-                        }
-                        return token;
-                    }).toList();
-            this.tokenList = adaptedTokenStream;
-            */
-
-        }
-        return applyOperations();
-    }
-
-    private void reconcile(Token token) {
+    private void reconcile(Token token, CompilationError error) {
         int actualTokenIndex = this.getErrorTokenPositionOfTokenStream(token);
 
         if (token.getTokenIndex() < 0) {
@@ -141,43 +69,23 @@ public class DeepErrorRecoveryHandler {
                     .filter(t -> t.getCharPositionInLine() == token.getCharPositionInLine())
                     .findFirst();
             if (matchedToken.isPresent()) {
-                actualTokenIndex = getErrorTokenPositionOfTokenStream(matchedToken.get());
+                actualTokenIndex = matchedToken.get().getTokenIndex();
             }
         }
-        if (actualTokenIndex != -1 && actualTokenIndex < modelOutput.length-1) {
-            //System.out.println(msg);
-            //System.out.println("Noisy: [" + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex+1).getType() + " , " +  "] , Model: [" + modelOutput[actualTokenIndex]+ ", " + modelOutput[actualTokenIndex+1] + "]");
-            int modelCurrent = modelOutput[actualTokenIndex + indexCorrection];
-            int modelLA = modelOutput[actualTokenIndex + 1 + indexCorrection];
+        if (actualTokenIndex != -1 && actualTokenIndex < modelOutput.size()-1) {
+            int modelCurrent = modelOutput.get(actualTokenIndex + indexCorrection).getType();
+            int modelLA = modelOutput.get(actualTokenIndex + 1 + indexCorrection).getType();
             int seqCurrent = reconstructedList.get(actualTokenIndex).getType();
             int seqLA = actualTokenIndex < reconstructedList.size()-1 ?  reconstructedList.get(actualTokenIndex + 1).getType() : -1;
             // insert
-            //System.out.println("rec: [ " + reconstructedList.get(actualTokenIndex).getType() + ", " + reconstructedList.get(actualTokenIndex + 1).getType() + "] | model: [ " + modelOutput[actualTokenIndex] + ", " + modelOutput[actualTokenIndex + 1] + "]");
-            if (modelCurrent == seqCurrent && modelLA == seqLA) {
+            if (modelCurrent != seqCurrent && modelLA == seqLA) {
                 // do nothing
-            } //else if (modelLA == seqLA) {
-                // TODO: Set index to next position?
-            //}
-            else if (seqCurrent == modelLA) {
-                //System.out.println("INSERT");
-                addTokenFromModelOutput(actualTokenIndex);
-                //indexCorrection+=1;
-            } else if (seqLA == modelCurrent) {
-                //System.out.println("DELETE");
-                removeTokenFromModelOutput(actualTokenIndex);
-                //indexCorrection-=1;
-            } else {
-                //System.out.println("MODIFY");
                 replaceTokenFromModelOutput(actualTokenIndex);
             }
-        }
-        else if (modelOutput.length > reconstructedList.size()) {
-            // if model has more tokens, we add them
-            { // correctionIndex < modelOutput.length &&
-                int tokensToAdd = modelOutput.length - reconstructedList.size();
-                for (int i = tokensToAdd; i > 0; i--) {
-                    addTokenFromModelOutput(modelOutput.length-1-i);
-                }
+            else if (seqCurrent == modelLA) {
+                addTokenFromModelOutput(actualTokenIndex);
+            } else if (seqLA == modelCurrent) {
+                removeTokenFromModelOutput(actualTokenIndex);
             }
         }
     }
@@ -188,170 +96,105 @@ public class DeepErrorRecoveryHandler {
     }
 
     private void replaceTokenFromModelOutput(int actualTokenIndex) {
-        CommonToken newToken = new CommonToken(modelOutput[actualTokenIndex]);
+        CommonToken newToken = new CommonToken(modelOutput.get(actualTokenIndex));
         newToken.setTokenIndex(actualTokenIndex);
         this.replacements.put(actualTokenIndex, newToken); //reconstructedList.set(actualTokenIndex, newToken);
         //this.modelOutput = replaceElement(modelOutput, actualTokenIndex, newToken.getType());
     }
 
     private void addTokenFromModelOutput(int actualTokenIndex) {
-        // TODO: index is wrong, should be initial token list size?
-        CommonToken newToken = new CommonToken(modelOutput[actualTokenIndex]);
+        CommonToken newToken = new CommonToken(modelOutput.get(actualTokenIndex));
         newToken.setTokenIndex(tokenList.size()); // +addedTokens
-        //this.replacements.put(actualTokenIndex, newToken); //reconstructedList.add(newToken);
-        //modelOutput = addElement(modelOutput, newToken.getTokenIndex(), newToken.getType());
         this.additions.put(actualTokenIndex, newToken);
     }
 
     public int getErrorTokenPositionOfTokenStream(Token currentToken) {
-        //Optional<Token> matchedToken =  reconstructedList.stream().filter(t -> t.getTokenIndex() == currentToken.getTokenIndex()+netModifications).findFirst();
-        //return matchedToken.isPresent() ? reconstructedList.indexOf((Token) currentToken) : -1;
-        //reconstructedList.indexOf(currentToken);
-        return IntStream.range(0, reconstructedList.size())
+        return IntStream.range(0, reconstructedList.size()+1)
                 .filter(i -> reconstructedList.get(i).getTokenIndex() == (currentToken.getTokenIndex()))
                 .findFirst() // Find the first matching index
                 .orElse(-1);
     }
 
-    public int getTotalNumberOfTokens() {
-        return this.tokenList.size();
-    }
-
     public List<CompilationError> getCompilationErrorList() {
-        return new ArrayList<>(this.compilationErrorList.stream().collect(Collectors.toMap(
+        return new ArrayList<>(this.compilationErrorList.stream()
+                .collect(Collectors.toMap(
                         CompilationError::getPosition, // Key mapper
                         Function.identity(), // Value mapper (identity function)
                         (existing, replacement) -> existing, // Merge function to keep existing objects
-                        HashMap::new // Use LinkedHashMap to preserve the order
-                ))
+                        HashMap::new)) // Use LinkedHashMap to preserve the order
                 .values());
-    }
-
-
-    public int[] getReconstructedSequence() {
-
-        applyOperations();
-        return reconstructedList.stream()
-                .map(Token::getType)
-                .mapToInt(Integer::intValue)
-                .toArray();
     }
 
     // Apply all operations to the list
     public int[] applyOperations() {
-        /*
-        try {
-            // Apply modifications
-            for (Map.Entry<Integer, Token> entry : replacements.entrySet()) {
-                int index = entry.getKey();
-                Token newElement = entry.getValue();
-                reconstructedList.set(index, newElement);
-            }
-            // Apply deletions first to avoid index shifting
-            TreeMap<Integer, Token> sortedMap = new TreeMap<>(Comparator.reverseOrder());
-            sortedMap.putAll(deletions);
-            for (Integer index : sortedMap.keySet()) {
-                reconstructedList.remove((int) index);
-            }
-            // Apply insertions
-            for (Map.Entry<Integer, Token> entry : additions.entrySet()) {
-                int index = entry.getKey();
-                Token element = entry.getValue();
+        for (Integer index : replacements.keySet()) {
+            Token tokenBefore = reconstructedList.get(index);
+            reconstructedList.set(index, replacements.get(index));
+            int adjustedPosition = getAdjustedPosition(index);
+            operations.add(
+                    new RecoveryOperation(
+                            "MOD",
+                            index,
+                            adjustedPosition,
+                            ANTLR_INDEX_2_TOKEN.get(tokenBefore.getType()),
+                            ANTLR_INDEX_2_TOKEN.get(replacements.get(index).getType()),
+                            adjustedPosition < original.length ? ANTLR_INDEX_2_TOKEN.get(original[adjustedPosition]) : "EOF"
+                    )
+            );
+        }
+        for (Integer index : deletions.keySet()) {
+            Token tokenBefore = reconstructedList.get(index);
+            reconstructedList.set(index, deletions.get(index));
+            int adjustedPosition = getAdjustedPosition(index);
+            operations.add(
+                    new RecoveryOperation(
+                            "DEL",
+                            index,
+                            adjustedPosition,
+                            ANTLR_INDEX_2_TOKEN.get(tokenBefore.getType()),
+                            index+1 < reconstructedList.size() && reconstructedList.get(index+1) != null ? ANTLR_INDEX_2_TOKEN.get(reconstructedList.get(index+1).getType()) : "EOF",
+                            adjustedPosition < original.length ? ANTLR_INDEX_2_TOKEN.get(original[adjustedPosition]) : "EOF"
+                    )
+            );
+        }
+        TreeMap<Integer, Token> reverseAdditions = new TreeMap<>(Collections.reverseOrder());
+        reverseAdditions.putAll(additions);
 
-                reconstructedList.add(index, element);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();;
+        for (Integer index : reverseAdditions.keySet()) {
+            Token tokenBefore = index < reconstructedList.size() ? reconstructedList.get(index) : null;
+            reconstructedList.add(index, reverseAdditions.get(index));
+            int adjustedPosition = getAdjustedPosition(index);
+            operations.add(
+                    new RecoveryOperation(
+                            "INS",
+                            index,
+                            adjustedPosition,
+                            ANTLR_INDEX_2_TOKEN.get(tokenBefore != null ? tokenBefore.getType() : "EOF"),
+                            ANTLR_INDEX_2_TOKEN.get(additions.get(index).getType()),
+                            adjustedPosition < original.length ? ANTLR_INDEX_2_TOKEN.get(original[adjustedPosition]) : "EOF"
+                    )
+            );
         }
-        // Clear the operations
-        //additions.clear();
-        //deletions.clear();
-        //replacements.clear();
-        return reconstructedList.stream()
-                .map(Token::getType)
-                .mapToInt(Integer::intValue)
-                .toArray();
-        */
-        List<Integer> newList = new ArrayList<>();
-        for (Token item : tokenList) {
-            int actualTokenIndex = getErrorTokenPositionOfTokenStream(item);
-            if (deletions.containsKey(actualTokenIndex)) {
-                newList.add(null);
-            } else if (replacements.containsKey(actualTokenIndex)) {
-                newList.add(replacements.get(actualTokenIndex).getType()); // Replace value from replaceMap
-            }
-            else if (additions.containsKey(actualTokenIndex)) {
-                // first add the new token, then the current one
-                newList.add(additions.get(actualTokenIndex).getType());
-                newList.add(item.getType());
-            } //else newList.add(replacements.getOrDefault(id, item).getType());
-            else {
-                // just add it
-                newList.add(item.getType());
-            }
-        }
-        return newList.stream().filter(Objects::nonNull).mapToInt(n -> n).toArray();
+        return reconstructedList.stream().filter(Objects::nonNull).mapToInt(Token::getType).toArray();
     }
 
-    private static int[] deleteElement(int[] array, int index) {
-        // Check if the index is within bounds
-        if (index < 0 || index >= array.length) {
-            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
-        }
-
-        // Create a new array with size one less than the original array
-        int[] newArray = new int[array.length - 1];
-
-        // Copy elements from the original array to the new array, skipping the element at the specified index
-        for (int i = 0, j = 0; i < array.length; i++) {
-            if (i != index) {
-                newArray[j++] = array[i];
+    private int getAdjustedPosition(int position) {
+        int deletionsCount = 0;
+        int additionsCount = 0;
+        for (Integer key : deletions.keySet()) {
+            if (key < position) {
+                deletionsCount++;
             }
         }
-
-        return newArray;
-    }
-
-    private static int[] replaceElement(int[] array, int index, int newValue) {
-        // Check if the index is within bounds
-        if (index < 0 || index >= array.length) {
-            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
-        }
-
-        // Replace the element at the specified index
-        array[index] = newValue;
-        return array;
-    }
-
-    private static int[] addElement(int[] array, int index, int newValue) {
-        // Check if the index is within bounds
-        if (index < 0 || index > array.length) {
-            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + array.length);
-        }
-
-        // Create a new array with size one greater than the original array
-        int[] newArray = new int[array.length + 1];
-
-        // Copy elements from the original array to the new array, adding the new element at the specified index
-        for (int i = 0, j = 0; i < newArray.length; i++) {
-            if (i == index) {
-                newArray[i] = newValue;
-            } else {
-                newArray[i] = array[j++];
+        for (Integer key : additions.keySet()) {
+            if (key < position) {
+                additionsCount++;
             }
         }
-
-        return newArray;
+        return position - deletionsCount + additionsCount;
     }
 
-    public int[] applyReplacements() {
-        for (Map.Entry<Integer, Token> entry : replacements.entrySet()) {
-            reconstructedList.set(entry.getKey(), entry.getValue());
-            // Do something with key and value
-        }
-        return reconstructedList.stream()
-                .map(Token::getType)
-                .mapToInt(Integer::intValue)
-                .toArray();
+    public List<RecoveryOperation> getOperations() {
+        return operations;
     }
 }

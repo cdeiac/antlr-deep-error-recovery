@@ -17,7 +17,6 @@ public class JavaErrorListener extends BaseErrorListener {
     private List<Token> reconstructedList;
     private int[] original;
     private List<CompilationError> compilationErrorList = new ArrayList<>();
-    private int netModifications = 0;
     private List<RecoveryOperation> operations = new ArrayList<>();
 
 
@@ -52,9 +51,6 @@ public class JavaErrorListener extends BaseErrorListener {
     }
 
     public int getErrorTokenPositionOfTokenStream(Token currentToken) {
-        //Optional<Token> matchedToken =  reconstructedList.stream().filter(t -> t.getTokenIndex() == currentToken.getTokenIndex()+netModifications).findFirst();
-        //return matchedToken.isPresent() ? reconstructedList.indexOf((Token) currentToken) : -1;
-        //reconstructedList.indexOf(currentToken);
         if (currentToken.getType() == -1) {
             return -1;
         }
@@ -70,40 +66,6 @@ public class JavaErrorListener extends BaseErrorListener {
                 .toList()
                 .isEmpty();
     }
-
-    private Integer getNextNonWhitespaceToken(int position) {
-        boolean done = false;
-        Token token = reconstructedList.get(position);
-        if (position > reconstructedList.size()-2) {
-            return -1;
-        }
-        while (!done) {
-            position+=1;
-            token = reconstructedList.get(position);
-            if (position >= reconstructedList.size()-1 || token.getType() > 0 || token.getType() != 125) {
-                position-=1;
-                token = reconstructedList.get(position);
-                done = true;
-            }
-        }// TODO: remove WS tokens!!!
-        return token != null ? token.getType() : null;
-    }
-
-    private int getRetrievalPosition(int errorPosition) {
-        return errorPosition - deletions.size() + additions.size();
-    }
-
-    /*
-    public int getErrorTokenPositionOfTokenStream(Token currentToken) {
-        int tokenIndex = currentToken.getTokenIndex();
-        AtomicInteger numberOfWS = new AtomicInteger();
-        IntStream.range(0, tokenIndex+1).forEach(i -> {
-            if (tokenList.get(i).getType() == 125) {
-                numberOfWS.addAndGet(1);
-            }
-        });
-        return tokenIndex - numberOfWS.get();
-    }*/
 
     public List<CompilationError> getCompilationErrorList() {
         return new ArrayList<>(this.compilationErrorList.stream()
@@ -132,17 +94,12 @@ public class JavaErrorListener extends BaseErrorListener {
     }
 
     public String replaceExpectedToken(String input) {
-        // Find the index of "expecting"
         int index = input.indexOf("expecting");
         if (index != -1) {
-            // Extract the substring after "expecting"
             String subString = input.substring(index + "expecting".length()).trim();
-            // Remove surrounding curly braces
             subString = subString.substring(1, subString.length() - 1).trim();
-            // Split the substring by commas and get the first element
             String[] elements = subString.split(",");
             String firstElement = elements[0].trim();
-            // Remove single quotes around the element
             return firstElement.replaceAll("^'|'$", "");
         } else {
             return null;
@@ -150,11 +107,8 @@ public class JavaErrorListener extends BaseErrorListener {
     }
     public String replaceMissingToken(String message) {
         String extractedTokenText = "";
-        // Find the positions of the single quotes
         int startIndex = message.indexOf("'");
         int endIndex = message.indexOf("'", startIndex + 1);
-
-        // Extract the substring between the single quotes
         if (startIndex != -1 && endIndex != -1) {
             extractedTokenText = message.substring(startIndex + 1, endIndex);
         }
@@ -167,9 +121,7 @@ public class JavaErrorListener extends BaseErrorListener {
             // EOF: nothing to do
             return;
         }
-        //reconstructedList.remove(tokenIndex);
         deletions.put(tokenIndex, null);
-        //netModifications -= 1;
     }
 
 
@@ -231,18 +183,7 @@ public class JavaErrorListener extends BaseErrorListener {
         }
         newToken.setText(tokenName);
         newToken.setType(replacementTokenId);
-        //reconstructedList.add(tokenIndex, newToken); //+ netModifications, newToken);
-        //netModifications += 1;
         additions.put(tokenIndex, newToken);
-        /*
-        for (int i = tokenIndex; i < reconstructedList.size(); i++) {
-            Token nextToken = reconstructedList.get(i);
-            CommonToken nextTokenWithText = new CommonToken(nextToken);
-            nextTokenWithText.setTokenIndex(nextToken.getTokenIndex()+1);
-            nextTokenWithText.setText(nextToken.getText());
-            reconstructedList.set(i, nextTokenWithText);
-        }*/
-
     }
 
     public int[] getReconstructedSequence() {

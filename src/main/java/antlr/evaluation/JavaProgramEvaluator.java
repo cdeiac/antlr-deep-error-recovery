@@ -6,7 +6,7 @@ import antlr.converters.ANTLRDataConverter;
 import antlr.converters.ANTLRModelConverter;
 import antlr.converters.ANTLRPlaceholderToken;
 import antlr.converters.ModelDataConverter;
-import antlr.errorrecovery.DeepErrorRecoveryHandler2;
+import antlr.errorrecovery.DeepErrorRecoveryHandler;
 import antlr.errorrecovery.JavaOracle;
 import antlr.extensions.CustomErrorStrategy;
 import antlr.utils.FileUtils;
@@ -252,7 +252,7 @@ public class JavaProgramEvaluator {
         // TODO: Experimental
         //FullTokenDeepErrorHandler handler = new FullTokenDeepErrorHandler(tokens.getTokens(), baseTokenstream.getTokens());//new DeepErrorRecoveryHandler(tokens.getTokens(), antlrEncodedModelOutput);
         //List<Token> onErrorStream = handler.reconcileErrorNodes(visitor.errorNodes);//handler.reconcileErrorNodes(visitor.errorNodes);
-        DeepErrorRecoveryHandler2 handler = new DeepErrorRecoveryHandler2(tokens.getTokens(), modelTokens.getTokens(), antlrEncodedOriginalInput);
+        DeepErrorRecoveryHandler handler = new DeepErrorRecoveryHandler(tokens.getTokens(), modelTokens.getTokens(), antlrEncodedOriginalInput);
         //  int[] onErrorOutput = handler.reconcileErrorNodes(visitor.errorNodes);
         handler.reconcileCompilationErrors(baseStatistics.getBaseCompilationErrors());
 

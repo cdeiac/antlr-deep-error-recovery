@@ -65,19 +65,4 @@ public class BaseJavaErrorListener extends BaseErrorListener {
                 ))
                 .values());
     }
-    public int[] getReconstructedSequence() {
-        return reconstructedList.stream()
-                .map(Token::getType)
-                .mapToInt(Integer::intValue)
-                .toArray();
-    }
-
-    public int findPreviousIndex(int positionIndex) {
-        int match = IntStream.range(0, reconstructedList.size())
-                .filter(i -> reconstructedList.get(i).getTokenIndex() > positionIndex)
-                .findFirst() // Find the first matching index
-                .orElse(-1);
-        return match-1;
-    }
-
 }
